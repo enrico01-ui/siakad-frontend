@@ -209,7 +209,7 @@ export default function AbsensiGuru() {
     try {
       setLoading(true);
       const response = await getSesiAbsensi();
-      let filtered = response.data.data || [];
+      let filtered = response.data || [];
       console.log("Sesi absensi:", filtered);
       if (filterSemester !== "all") filtered = filtered.filter((item) => item.semester_id === parseInt(filterSemester));
 
@@ -235,7 +235,7 @@ export default function AbsensiGuru() {
       const totalHariKerja = hitungHariKerja(selectedMonth, selectedYear, libur);
       setHariKerja(totalHariKerja);
 
-      let allSesi = sesiResponse.data?.data || sesiResponse.data || [];
+      let allSesi = sesiResponse.data || sesiResponse.data || [];
 
       // Filter: exclude weekend & libur nasional
       const filtered = allSesi.filter((item) => {
