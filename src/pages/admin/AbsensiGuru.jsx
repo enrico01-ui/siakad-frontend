@@ -236,7 +236,7 @@ export default function AbsensiGuru() {
       setHariKerja(totalHariKerja);
 
       let allSesi = sesiResponse.data || sesiResponse.data || [];
-
+      console.log("Semua sesi untuk rekap bulanan:", allSesi);
       // Filter: exclude weekend & libur nasional
       const filtered = allSesi.filter((item) => {
         const tanggal = new Date(item.jam_mulai).toISOString().split("T")[0];
@@ -252,7 +252,7 @@ export default function AbsensiGuru() {
 
         return matchSemester && matchMonth && matchYear && !isHariLibur && !isLiburMingguan;
       });
-
+      console.log("Sesi setelah filter untuk rekap bulanan:", filtered);
       // Group by guru
       const rekapByGuru = {};
       filtered.forEach((sesi) => {
@@ -288,7 +288,7 @@ export default function AbsensiGuru() {
           rekapByGuru[guruId].totalJamKerja += sesi.durasi_menit;
         }
       });
-
+      console.log("Rekap per guru:", rekapByGuru);
       setRekapData(Object.values(rekapByGuru));
     } catch (error) {
       console.error("Error loading rekap:", error);
