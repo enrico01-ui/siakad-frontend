@@ -17,7 +17,8 @@ function SignInForm() {
 
   const [state, setState] = React.useState({
     username: "",
-    password: ""
+    password: "",
+    captcha_token: ""
   });
   const handleChange = evt => {
     const value = evt.target.value;
@@ -41,7 +42,7 @@ function SignInForm() {
     try {
       const { username, password } = state;
 
-      const res = await login({ username, password });
+      const res = await login({ username, password, captcha_token: captchaToken });
       console.log(res);
       if(res.data.message === "Login gagal") {
         throw new Error(res.data.message || "Login gagal");
@@ -110,7 +111,7 @@ function SignInForm() {
           onChange={handleChange}
         />
         <ReCAPTCHA
-          sitekey="6Ld-k1UsAAAAAKCArmenvco0o_ffmhxAJJClItAd"
+          sitekey="6LfuUXMsAAAAAMm9qHQqbchYj0-ELQ-izWUkQJoX"
           onChange={handleCaptchaChange}
         />
 
