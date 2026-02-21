@@ -4,8 +4,8 @@ import Sidebar from "../components/Sidebar";
 
 function MainLayout() {
   const user = localStorage.getItem("user");
-  const userData = user ? JSON.parse(user) : null;
-  const userRole = userData ? userData.role.nama : "siswa";
+  const userData = user ? JSON.parse(user) : {};
+  const userRole = userData ? userData?.role.nama : "siswa";
   
   const handleLogout = () => {
     toast.success("Logout berhasil!");
