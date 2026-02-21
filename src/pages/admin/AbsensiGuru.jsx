@@ -694,7 +694,7 @@ export default function AbsensiGuru() {
                 <h6 className="fw-bold mb-3">{selectedAbsensi.status === "izin" ? "Bukti Izin" : "Foto Bukti"}</h6>
                 <div className="border rounded p-2">
                   {selectedAbsensi.foto_bukti ? (
-                    <img src={`${import.meta.env.VITE_API_URL}/storage/${selectedAbsensi.foto_bukti}`}
+                    <img src={`${selectedAbsensi.foto_bukti}`}
                       alt="Foto Bukti" className="img-fluid rounded"
                       style={{ maxHeight: "400px", width: "100%", objectFit: "contain" }}
                       onError={(e) => { e.target.src = "https://via.placeholder.com/400x500?text=Foto+Tidak+Tersedia"; }}
@@ -707,7 +707,7 @@ export default function AbsensiGuru() {
                 </div>
                 {selectedAbsensi.foto_bukti && (
                   <Button variant="outline-primary" size="sm" className="w-100 mt-2" as="a"
-                    href={`${import.meta.env.VITE_API_URL}/storage/${selectedAbsensi.foto_bukti}`} target="_blank">
+                    href={`${selectedAbsensi.foto_bukti}`} target="_blank">
                     <Download size={16} className="me-1" /> Download Foto
                   </Button>
                 )}
@@ -778,7 +778,7 @@ export default function AbsensiGuru() {
                       <td>
                         {absensi.foto_bukti ? (
                           <Button size="sm" variant="outline-primary" as="a"
-                            href={`${import.meta.env.VITE_API_URL}/storage/${absensi.foto_bukti}`} target="_blank">
+                            href={`${absensi.foto_bukti}`} target="_blank">
                             <Eye size={12} className="me-1" /> Lihat
                           </Button>
                         ) : <span className="text-muted">-</span>}
