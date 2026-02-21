@@ -508,7 +508,7 @@ export default function Kelas() {
                                 size="sm"
                                 variant="outline-primary"
                                 as="a"
-                                href={`${import.meta.env.VITE_API_URL}/storage/${rapor.rapor_files[0].file_path || '#'}`}
+                                href={`${import.meta.env.VITE_API_URL}/storage/${rapor.rapor_files.file_path || '#'}`}
                                 target="_blank"
                               >
                                 <Eye size={12} className="me-1" />

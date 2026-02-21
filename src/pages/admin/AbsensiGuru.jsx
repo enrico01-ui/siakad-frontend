@@ -81,7 +81,9 @@ const deriveStatusTampilan = (sesi) => {
   if (status === "valid") {
     // Cek apakah terlambat berdasarkan jam masuk
     const absensiMasuk = sesi.absensi?.find((a) => a.status === "masuk");
+    console.log(`Sesi ${sesi.id} - Absensi Masuk:`, absensiMasuk);
     if (absensiMasuk && isTerlambat(absensiMasuk.jam)) return "terlambat";
+    console.log(`Sesi ${sesi.id} - Status valid tanpa keterlambatan`);
     return "hadir";
   }
 
@@ -208,7 +210,10 @@ export default function AbsensiGuru() {
       setLoading(true);
       const response = await getSesiAbsensi();
       let filtered = response.data.data || [];
+      console.log("Sesi absensi:", filtered);
       if (filterSemester !== "all") filtered = filtered.filter((item) => item.semester_id === parseInt(filterSemester));
+
+      console.log("Sesi setelah filter semester:", filtered);
       setSesiData(filtered);
     } catch (error) {
       console.error("Error loading sesi:", error);
@@ -1034,7 +1039,7 @@ function TableLaporanBulanan({ data, month, year, semester, hariKerja, hariLibur
             const totalMasuk = rekap.totalHadir + rekap.totalTerlambat;
             const persentase = hariEfektif > 0 ? ((totalMasuk / hariEfektif) * 100).toFixed(1) : 0;
             const avgJam = rekap.totalHadir > 0 ? rekap.totalJamKerja / rekap.totalHadir : 0;
-
+            console.log(`Guru: ${rekap.guru?.nama}, Hari Kerja: ${hariEfektif}, Hadir: ${rekap.totalHadir}, Terlambat: ${rekap.totalTerlambat}, % Hadir: ${persentase}%`);
             return (
               <tr key={index}>
                 <td className="text-center">{index + 1}</td>

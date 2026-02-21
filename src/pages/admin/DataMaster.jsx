@@ -795,7 +795,7 @@ function TableRapor({ data, searchTerm }) {
                   {rapor.siswa?.kelas?.nama_kelas || '-'}
                 </Badge>
               </td>
-              <td>{rapor.semester || '-'}</td>
+              <td>{rapor.semester.nama || '-'}</td>
               <td>{rapor.tahun_ajaran || '-'}</td>
               <td>
                 {rapor.uploaded_at 

@@ -540,7 +540,7 @@ const handleFileChange = (e) => {
               <Card className="bg-light border-0">
                 <Card.Body>
                   <h6 className="fw-bold mb-2">Informasi Target:</h6>
-                  <Badge bg="primary">Siswa ${guru.kelas?.map(k => k.nama_kelas).join(', ') || "Semua Kelas"}</Badge>
+                  <Badge bg="primary">Siswa kelas {guru.kelas?.map(k => k.nama_kelas).join(', ') || "Semua Kelas"}</Badge>
                 </Card.Body>
               </Card>
             </>
