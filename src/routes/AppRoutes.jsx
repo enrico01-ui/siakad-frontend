@@ -30,6 +30,7 @@ import MainLayout from "../pages/MainLayout.jsx";
 
 export default function AppRoutes() {
   const user = JSON.parse(localStorage.getItem("user"));
+  const userRole = user ? user.role.nama : "guru";
   return (
     <Routes>
       <Route path="/" element={<App/>} />
@@ -69,7 +70,7 @@ export default function AppRoutes() {
           <Route path="/siswa/rapor" element={<RaporSaya />} />
           <Route path="/siswa/spp" element={<SppSaya />} />
         </Route>
-        <Route path="/profil" element={<Profil role={user.role.nama}/>} />
+        <Route path="/profil" element={<Profil role={user?.role.nama}/>} />
       </Route>
     </Route>
 
