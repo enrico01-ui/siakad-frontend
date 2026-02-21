@@ -27,7 +27,7 @@ export default function PengumumanAdmin() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedPengumuman, setSelectedPengumuman] = useState(null);
   const [kelas_id, setKelasId] = useState([]);
-  
+  const [attachments, setAttachments] = useState([]);  
 const [formData, setFormData] = useState({
     judul: "",
     isi: "",
@@ -45,8 +45,14 @@ const [formData, setFormData] = useState({
   }
 }, []);
   // Form states
-  
-
+  // Handle file change
+const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    setAttachments(prev => [...prev, ...files]);
+};
+  const removeAttachment = (index) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+};
   useEffect(() => {
     fetchData();
   }, []);
@@ -70,14 +76,20 @@ const [formData, setFormData] = useState({
     try {
       console.log("Submitting form data:", formData);
       setLoading(true);
-      await createPengumuman(formData);
-      toast.success("Pengumuman berhasil dibuat dan dipublikasikan!");
-      
-      // Reset form
+      const fd = new FormData();
+      fd.append('judul', formData.judul);
+      fd.append('isi', formData.isi);
+      formData.kelas_id.forEach(id => fd.append('kelas_id[]', id));
+      attachments.forEach(file => fd.append('attachments[]', file));
+      console.log("Form data after reset:", formData);
+      console.log("Attachments after reset:", attachments);
+      console.log(fd.getAll('attachments[]'));
+      await createPengumuman(fd);
+      toast.success("Pengumuman berhasil dipublikasikan!");
       setFormData({ judul: "", isi: "", kelas_id: kelas_id });
-      setShowAddModal(false);
       
-      // Reload data
+      setAttachments([]);
+      setShowAddModal(false);
       await fetchData();
     } catch (error) {
       console.error("Error creating pengumuman:", error);
@@ -380,6 +392,34 @@ const [formData, setFormData] = useState({
                 onChange={handleInputChange}
                 required
               />
+              <Form.Group className="mb-3">
+                  <Form.Label>Lampiran <span className="text-muted">(opsional)</span></Form.Label>
+                  <Form.Control
+                      type="file"
+                      multiple
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+                      onChange={handleFileChange}
+                  />
+                  <Form.Text className="text-muted">
+                      Format: PDF, Word, Excel, Gambar. Maks 10MB per file.
+                  </Form.Text>
+                  
+                  {/* Preview list attachment */}
+                  {attachments.length > 0 && (
+                      <div className="mt-2">
+                          {attachments.map((file, i) => (
+                              <div key={i} className="d-flex align-items-center justify-content-between 
+                                  border rounded p-2 mb-1 bg-light">
+                                  <small>📎 {file.name} ({(file.size / 1024).toFixed(1)} KB)</small>
+                                  <Button size="sm" variant="outline-danger" 
+                                      onClick={() => removeAttachment(i)}>
+                                      <XCircle size={12} />
+                                  </Button>
+                              </div>
+                          ))}
+                      </div>
+                  )}
+              </Form.Group>
               <Form.Text className="text-muted">
                 Jelaskan pengumuman dengan detail
               </Form.Text>
@@ -478,11 +518,29 @@ const [formData, setFormData] = useState({
                   {selectedPengumuman.isi}
                 </div>
               </div>
-
+              {selectedPengumuman?.attachments?.length > 0 && (
+                <div className="mt-3">
+                    <h6 className="fw-bold">📎 Lampiran:</h6>
+                    {selectedPengumuman.attachments.map(file => (
+                        <a key={file.id} 
+                            href={`${import.meta.env.VITE_API_URL}/storage/${file.path}`}
+                            target="_blank"
+                            className="d-flex align-items-center gap-2 text-decoration-none 
+                                border rounded p-2 mb-1 bg-light text-dark"
+                        >
+                            <span>📄</span>
+                            <small>{file.nama_file}</small>
+                            <small className="text-muted ms-auto">
+                                ({(file.ukuran / 1024).toFixed(1)} KB)
+                            </small>
+                        </a>
+                    ))}
+                </div>
+            )}      
               <Card className="bg-light border-0">
                 <Card.Body>
                   <h6 className="fw-bold mb-2">Informasi Target:</h6>
-                  <Badge bg="primary">Siswa (Semua Kelas)</Badge>
+                  <Badge bg="primary">Siswa ${selectedPengumuman.targets.kelas.nama_kelas || "Semua Kelas"}</Badge>
                 </Card.Body>
               </Card>
             </>

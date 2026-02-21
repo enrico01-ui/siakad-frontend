@@ -18,3 +18,5 @@ export const createSesiAbsensi = (data) => api.post("/sesi-absensi", data);
 export const closeSesiAbsensi = (id, data) => api.post(`/sesi-absensi/${id}/close`, data);
 export const updateSesiAbsensi = (id, data) => api.put(`/sesi-absensi/${id}`, data);
 export const getSesiAbsensiById = (id) => api.get(`/sesi-absensi/${id}`);
+export const getHariLibur = (month, year) => 
+    api.get(`/hari-libur?month=${month}&year=${year}`);

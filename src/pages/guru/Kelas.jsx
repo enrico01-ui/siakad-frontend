@@ -103,9 +103,9 @@ export default function Kelas() {
     const file = e.target.files[0];
     if (file) {
       // Validate file type
-      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+      const allowedTypes = ['application/pdf'];
       if (!allowedTypes.includes(file.type)) {
-        alert("File harus berformat PDF, JPG, atau PNG!");
+        alert("File harus berformat PDF!");
         e.target.value = "";
         return;
       }
@@ -406,12 +406,12 @@ export default function Kelas() {
               <Form.Label>File Rapor <span className="text-danger">*</span></Form.Label>
               <Form.Control
                 type="file"
-                accept=".pdf,.jpg,.jpeg,.png"
+                accept=".pdf"
                 onChange={handleFileChange}
                 required
               />
               <Form.Text className="text-muted">
-                Format: PDF, JPG, PNG. Maksimal 5MB.
+                Format: PDF. Maksimal 5MB.
               </Form.Text>
             </Form.Group>
 
@@ -671,7 +671,7 @@ function TableRapor({ data, onDelete }) {
                         variant="outline-primary"
                         className="me-2"
                         as="a"
-                        href={"http://192.168.1.2:8000/storage/" + rapor.files[0].file_path || '#'}
+                        href={`${import.meta.env.VITE_API_URL}/storage/${rapor.files[0].file_path || '#'}`}
                         target="_blank"
                       >
                         <Eye size={14} className="me-1" />
@@ -682,7 +682,7 @@ function TableRapor({ data, onDelete }) {
                         variant="outline-success"
                         className="me-2"
                         as="a"
-                        href={"http://192.168.1.2:8000/storage/" + rapor.files[0].file_path || '#'}
+                        href={`${import.meta.env.VITE_API_URL}/storage/${rapor.files[0].file_path || '#'}`}
                         download
                       >
                         <Download size={14} className="me-1" />

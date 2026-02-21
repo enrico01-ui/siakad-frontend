@@ -520,14 +520,16 @@ function FormKelas({ formData, onChange, dataGuru }) {
           <Form.Label>Tingkat <span className="text-danger">*</span></Form.Label>
           <Form.Select
             name="tingkat"
-            value={formData.tingkat || ""}
+            value={formData.tingkat || 0}
             onChange={onChange}
             required
           >
             <option value="">Pilih Tingkat</option>
-            <option value="X">X</option>
-            <option value="XI">XI</option>
-            <option value="XII">XII</option>
+            {Array.from({ length: 13 }, (_, i) => (
+              <option key={i} value={i} selected={formData.tingkat == i}>
+                {i}
+              </option>
+            ))}
           </Form.Select>
         </Form.Group>
       </Col>
@@ -814,7 +816,7 @@ function TableRapor({ data, searchTerm }) {
                       variant="outline-primary" 
                       className="me-2"
                       as="a"
-                      href={rapor.rapor_files[0].file_path || '#'}
+                      href={`${import.meta.env.VITE_API_URL}/storage/${rapor.rapor_files[0].file_path || '#'}`}
                       target="_blank"
                     >
                       <Eye size={14} className="me-1" />
@@ -824,7 +826,7 @@ function TableRapor({ data, searchTerm }) {
                       size="sm" 
                       variant="outline-success"
                       as="a"
-                      href={rapor.rapor_files[0].file_path || '#'}
+                      href={`${import.meta.env.VITE_API_URL}/storage/${rapor.rapor_files[0].file_path || '#'}`}
                       download
                     >
                       <Download size={14} className="me-1" />

@@ -9,18 +9,17 @@ import {
 } from "react-bootstrap-icons";
 import { getTagihanSpp as getTagihan, createTagihanSpp as createTagihan, bulkCreateTagihan, deleteTagihanSpp as deletTagihan } from "../../services/sppApi";
 import { getKelas } from "../../services/kelasApi";
-import { getSemester } from "../../services/semesterApi";
 import { getSiswa } from "../../services/siswaApi";
+import SearchableSiswaSelect from "../../components/searchableSiswaSelect";
 
 export default function TuitionFee() {
   const [loading, setLoading] = useState(true);
   const [tagihanData, setTagihanData] = useState([]);
   const [kelasList, setKelasList] = useState([]);
-  const [semesterList, setSemesterList] = useState([]);
   const [siswaList, setSiswaList] = useState([]);
-  const [semesterAktif, setSemesterAktif] = useState(null);
   const [selectedKelas, setSelectedKelas] = useState("all");
-  const [selectedSemester, setSelectedSemester] = useState("");
+  //tahun sebelumnya
+  const [selectedTahun, setSelectedTahun] = useState((new Date().getFullYear() - 1).toString()); // aku pingn tahun sebelumnya
   const [searchTerm, setSearchTerm] = useState("");
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showSetNominalModal, setShowSetNominalModal] = useState(false);
@@ -29,10 +28,12 @@ export default function TuitionFee() {
 
   const [nominalForm, setNominalForm] = useState({
     siswa_id: "",
-    semester_id: "",
+    semester_id: 0, // Always 0 for tuition fee
+    tahun: new Date().getFullYear(),
     nominal_per_bulan: "",
     bulan_mulai: "10",
-    bulan_selesai: "6"
+    bulan_selesai: "6",
+    batas_bayar: "",
   });
 
   const BULAN_AJARAN = [10, 11, 12, 1, 2, 3, 4, 5, 6];
@@ -42,36 +43,56 @@ export default function TuitionFee() {
     9: 'September', 10: 'Oktober', 11: 'November', 12: 'Desember'
   };
 
+  // ✅ Generate dynamic display months with year
+  const getBulanDisplay = () => {
+    const tahun = parseInt(selectedTahun);
+    return [
+      { bulan: 10, tahun: tahun, label: `Okt`, key: `10-${tahun}` },
+      { bulan: 11, tahun: tahun, label: `Nov`, key: `11-${tahun}` },
+      { bulan: 12, tahun: tahun, label: `Des`, key: `12-${tahun}` },
+      { bulan: 1, tahun: tahun + 1, label: `Jan`, key: `1-${tahun + 1}` },
+      { bulan: 2, tahun: tahun + 1, label: `Feb`, key: `2-${tahun + 1}` },
+      { bulan: 3, tahun: tahun + 1, label: `Mar`, key: `3-${tahun + 1}` },
+      { bulan: 4, tahun: tahun + 1, label: `Apr`, key: `4-${tahun + 1}` },
+      { bulan: 5, tahun: tahun + 1, label: `Mei`, key: `5-${tahun + 1}` },
+      { bulan: 6, tahun: tahun + 1, label: `Jun`, key: `6-${tahun + 1}` },
+    ];
+  };
+  
+  const bulanDisplay = getBulanDisplay();
+
+  // ✅ Generate tahun options (current year ± 2 years)
+  const tahunOptions = [];
+  const currentYear = new Date().getFullYear();
+  for (let i = currentYear - 2; i <= currentYear + 2; i++) {
+    tahunOptions.push(i);
+  }
+  
   useEffect(() => {
     loadInitialData();
   }, []);
 
   useEffect(() => {
-    if (selectedSemester) {
+    if (selectedTahun) {
       loadTagihan();
     }
-  }, [selectedKelas, selectedSemester]);
+  }, [selectedKelas, selectedTahun]); // ✅ Changed dependency
 
   const loadInitialData = async () => {
     try {
       setLoading(true);
       
-      const [kelasRes, semesterRes, siswaRes] = await Promise.all([
+      const [kelasRes, siswaRes] = await Promise.all([
         getKelas(),
-        getSemester(),
         getSiswa()
       ]);
 
       setKelasList(kelasRes.data || []);
-      setSemesterList(semesterRes.data || []);
       setSiswaList(siswaRes.data || []);
       
-      const aktif = semesterRes.data.find(s => s.is_aktif);
-      if (aktif) {
-        setSemesterAktif(aktif);
-        setSelectedSemester(aktif.id.toString());
-        setNominalForm(prev => ({ ...prev, semester_id: aktif.id.toString() }));
-      }
+      // ✅ Set default tahun
+      setSelectedTahun((currentYear - 1).toString());
+      setNominalForm(prev => ({ ...prev, tahun: currentYear }));
     } catch (error) {
       console.error("Error loading initial data:", error);
     } finally {
@@ -84,7 +105,7 @@ export default function TuitionFee() {
       setLoading(true);
       const response = await getTagihan({
         jenis_tagihan: 'tuition_fee',
-        semester_id: selectedSemester
+        tahun: selectedTahun // ✅ Filter by tahun instead of semester_id
       });
       
       const groupedData = groupBySiswa(response.data.data || []);
@@ -113,13 +134,17 @@ export default function TuitionFee() {
         };
       }
 
-      const bulan = tagihan.bulan;
-      grouped[siswaId].tagihan[bulan] = {
+      // ✅ Use bulan-tahun as key to handle cross-year
+      const key = `${tagihan.bulan}-${tagihan.tahun}`;
+      grouped[siswaId].tagihan[key] = {
         id: tagihan.id,
+        bulan: tagihan.bulan,
+        tahun: tagihan.tahun,
         nominal: tagihan.nominal_tagihan,
         dibayar: tagihan.total_dibayar,
         sisa: tagihan.sisa,
-        status: tagihan.status
+        status: tagihan.status,
+        batas_bayar: tagihan.batas_bayar
       };
 
       grouped[siswaId].totalTagihan += parseFloat(tagihan.nominal_tagihan);
@@ -132,10 +157,12 @@ export default function TuitionFee() {
   const handleOpenSetNominal = () => {
     setNominalForm({
       siswa_id: "",
-      semester_id: selectedSemester || "",
+      semester_id: 0, // Always 0 for tuition fee
+      tahun: parseInt(selectedTahun),
       nominal_per_bulan: "",
       bulan_mulai: "10",
-      bulan_selesai: "6"
+      bulan_selesai: "6",
+      batas_bayar: "",
     });
     setShowSetNominalModal(true);
   };
@@ -143,8 +170,8 @@ export default function TuitionFee() {
   const handleSetNominal = async (e) => {
     e.preventDefault();
     
-    if (!nominalForm.siswa_id || !nominalForm.semester_id || !nominalForm.nominal_per_bulan) {
-      alert("Semua field harus diisi!");
+    if (!nominalForm.siswa_id || !nominalForm.nominal_per_bulan) {
+      alert("Semua field wajib harus diisi!");
       return;
     }
 
@@ -155,18 +182,31 @@ export default function TuitionFee() {
       const bulanSelesai = parseInt(nominalForm.bulan_selesai);
       const bulanArray = [];
       
-      for (let i = bulanMulai; i <= 12; i++) bulanArray.push(i);
-      for (let i = 1; i <= bulanSelesai; i++) bulanArray.push(i);
+      // Build array of months
+      if (bulanMulai <= bulanSelesai) {
+        // Same year (e.g., Jan to Jun)
+        for (let i = bulanMulai; i <= bulanSelesai; i++) {
+          bulanArray.push(i);
+        }
+      } else {
+        // Cross year (e.g., Oct to Jun)
+        for (let i = bulanMulai; i <= 12; i++) bulanArray.push(i);
+        for (let i = 1; i <= bulanSelesai; i++) bulanArray.push(i);
+      }
 
       // Create tagihan untuk setiap bulan
       for (const bulan of bulanArray) {
+        // ✅ Calculate tahun for each bulan
+        const tahunTagihan = bulan < bulanMulai ? nominalForm.tahun + 1 : nominalForm.tahun;
+
         await createTagihan({
           siswa_id: nominalForm.siswa_id,
-          semester_id: nominalForm.semester_id,
+          semester_id: 0, // Always 0 for tuition fee
           jenis_tagihan: 'tuition_fee',
           bulan: bulan,
-          tahun: new Date().getFullYear(),
-          nominal_tagihan: parseInt(nominalForm.nominal_per_bulan)
+          tahun: tahunTagihan,
+          nominal_tagihan: parseInt(nominalForm.nominal_per_bulan),
+          batas_bayar: nominalForm.batas_bayar || null
         });
       }
 
@@ -188,13 +228,13 @@ export default function TuitionFee() {
 
   const exportToExcel = () => {
     let csv = "No,Nama Siswa,NIS,Kelas,";
-    csv += BULAN_AJARAN.map(b => NAMA_BULAN[b]).join(",");
+    csv += bulanDisplay.map(item => item.label).join(",");
     csv += ",Total Dibayar\n";
 
     filteredData.forEach((data, idx) => {
-      csv += `${idx + 1},${data.siswa.nama},${data.siswa.nis || '-'},${data.siswa.kelas?.nama || '-'},`;
-      csv += BULAN_AJARAN.map(bulan => {
-        const t = data.tagihan[bulan];
+      csv += `${idx + 1},${data.siswa.nama},${data.siswa.nis || '-'},${data.siswa.kelas?.nama_kelas || '-'},`;
+      csv += bulanDisplay.map(item => {
+        const t = data.tagihan[item.key];
         return t ? t.dibayar : 0;
       }).join(",");
       csv += `,${data.totalDibayar}\n`;
@@ -204,7 +244,7 @@ export default function TuitionFee() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `tuition-fee-${semesterAktif?.nama || 'export'}.csv`;
+    a.download = `tuition-fee-tahun-${selectedTahun}.csv`;
     a.click();
   };
 
@@ -231,6 +271,12 @@ export default function TuitionFee() {
     }).format(angka);
   };
 
+  // ✅ Helper to check if overdue
+  const isOverdue = (batasBayar) => {
+    if (!batasBayar) return false;
+    return new Date(batasBayar) < new Date();
+  };
+
   return (
     <Container fluid className="p-4" style={{ backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
       <Row className="mb-4 align-items-center">
@@ -249,11 +295,10 @@ export default function TuitionFee() {
         </Col>
       </Row>
 
-      {semesterAktif && (
-        <Alert variant="info" className="mb-3">
-          <strong>Semester:</strong> {semesterAktif.nama} - {semesterAktif.tahun_ajaran}
-        </Alert>
-      )}
+      {/* ✅ Alert showing current year */}
+      <Alert variant="info" className="mb-3">
+        <strong>Tahun Ajaran:</strong> {selectedTahun}/{parseInt(selectedTahun) + 1}
+      </Alert>
 
       {/* Stats Cards */}
       <Row className="g-3 mb-4">
@@ -319,7 +364,7 @@ export default function TuitionFee() {
         </Col>
       </Row>
 
-      {/* Filters */}
+      {/* ✅ Filters - Changed Semester to Tahun */}
       <Card className="border-0 shadow-sm mb-3">
         <Card.Body>
           <Row className="g-3">
@@ -348,15 +393,15 @@ export default function TuitionFee() {
                 ))}
               </Form.Select>
             </Col>
+            {/* ✅ Changed from Semester to Tahun */}
             <Col md={4}>
               <Form.Select
-                value={selectedSemester}
-                onChange={(e) => setSelectedSemester(e.target.value)}
+                value={selectedTahun}
+                onChange={(e) => setSelectedTahun(e.target.value)}
               >
-                <option value="">Pilih Semester</option>
-                {semesterList.map(sem => (
-                  <option key={sem.id} value={sem.id}>
-                    {sem.nama} - {sem.tahun_ajaran}
+                {tahunOptions.map(tahun => (
+                  <option key={tahun} value={tahun}>
+                    Tahun Ajaran {tahun}/{tahun + 1}
                   </option>
                 ))}
               </Form.Select>
@@ -381,14 +426,14 @@ export default function TuitionFee() {
                   <th rowSpan="2" className="align-middle" style={{ width: '200px' }}>Nama Siswa</th>
                   <th rowSpan="2" className="text-center align-middle" style={{ width: '100px' }}>NIS</th>
                   <th rowSpan="2" className="text-center align-middle" style={{ width: '80px' }}>Kelas</th>
-                  <th colSpan={BULAN_AJARAN.length} className="text-center">Pembayaran Per Bulan</th>
+                  <th colSpan={bulanDisplay.length} className="text-center">Pembayaran Per Bulan</th>
                   <th rowSpan="2" className="text-center align-middle" style={{ width: '120px' }}>Total Dibayar</th>
                   <th rowSpan="2" className="text-center align-middle" style={{ width: '100px' }}>Aksi</th>
                 </tr>
                 <tr>
-                  {BULAN_AJARAN.map(bulan => (
-                    <th key={bulan} className="text-center" style={{ width: '100px' }}>
-                      {NAMA_BULAN[bulan]}
+                  {bulanDisplay.map(item => (
+                    <th key={item.key} className="text-center" style={{ width: '100px' }}>
+                      {item.label}
                     </th>
                   ))}
                 </tr>
@@ -401,20 +446,27 @@ export default function TuitionFee() {
                       <td className="fw-medium">{data.siswa.nama}</td>
                       <td className="text-center">{data.siswa.nis || '-'}</td>
                       <td className="text-center">{data.siswa.kelas?.nama_kelas || '-'}</td>
-                      {BULAN_AJARAN.map(bulan => {
-                        const tagihan = data.tagihan[bulan];
+                      {bulanDisplay.map(item => {
+                        const tagihan = data.tagihan[item.key];
+                        const overdue = tagihan && isOverdue(tagihan.batas_bayar) && tagihan.status !== 'LUNAS';
+                        
                         return (
-                          <td key={bulan} className="text-center p-1">
+                          <td key={item.key} className="text-center p-1">
                             {tagihan ? (
                               <div>
                                 <small className="text-muted d-block" style={{ fontSize: '10px' }}>
                                   {formatRupiah(tagihan.nominal)}
                                 </small>
                                 <Badge 
-                                  bg={tagihan.status === 'lunas' ? 'success' : tagihan.sisa < tagihan.nominal ? 'warning' : 'danger'}
+                                  bg={
+                                    tagihan.status === 'LUNAS' ? 'success' : 
+                                    overdue ? 'danger' :
+                                    tagihan.sisa < tagihan.nominal ? 'warning' : 'secondary'
+                                  }
                                   className="w-100"
                                   style={{ fontSize: '10px' }}
                                 >
+                                  {tagihan.status === 'LUNAS' ? '✓ ' : overdue ? '⚠ ' : ''}
                                   {formatRupiah(tagihan.dibayar)}
                                 </Badge>
                               </div>
@@ -440,8 +492,8 @@ export default function TuitionFee() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={BULAN_AJARAN.length + 6} className="text-center text-muted py-4">
-                      {selectedSemester ? "Tidak ada data tagihan" : "Pilih semester terlebih dahulu"}
+                    <td colSpan={bulanDisplay.length + 6} className="text-center text-muted py-4">
+                      Tidak ada data tagihan untuk tahun {selectedTahun}
                     </td>
                   </tr>
                 )}
@@ -450,13 +502,13 @@ export default function TuitionFee() {
                 <tfoot className="table-light">
                   <tr>
                     <td colSpan="4" className="text-end fw-bold">TOTAL:</td>
-                    {BULAN_AJARAN.map(bulan => {
+                    {bulanDisplay.map(item => {
                       const total = filteredData.reduce((sum, data) => {
-                        const t = data.tagihan[bulan];
+                        const t = data.tagihan[item.key];
                         return sum + (t ? parseFloat(t.dibayar) : 0);
                       }, 0);
                       return (
-                        <td key={bulan} className="text-center fw-bold">
+                        <td key={item.key} className="text-center fw-bold">
                           {formatRupiah(total)}
                         </td>
                       );
@@ -473,7 +525,7 @@ export default function TuitionFee() {
         </Card.Body>
       </Card>
 
-      {/* Modal Set Nominal - Same as before */}
+      {/* Modal Set Nominal */}
       <Modal show={showSetNominalModal} onHide={() => setShowSetNominalModal(false)} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>Set Nominal Tagihan Tuition Fee</Modal.Title>
@@ -482,37 +534,29 @@ export default function TuitionFee() {
           <Modal.Body>
             <Alert variant="info">
               <small>
-                <strong>Info:</strong> Nominal yang diset akan berlaku untuk semua bulan dalam rentang yang dipilih.
+                <strong>Info:</strong> Nominal yang diset akan berlaku untuk semua bulan dalam rentang yang dipilih. 
+                Semester ID untuk Tuition Fee selalu 0.
               </small>
             </Alert>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Pilih Siswa <span className="text-danger">*</span></Form.Label>
-              <Form.Select
-                value={nominalForm.siswa_id}
-                onChange={(e) => setNominalForm({...nominalForm, siswa_id: e.target.value})}
-                required
-              >
-                <option value="">-- Pilih Siswa --</option>
-                {siswaList.map(siswa => (
-                  <option key={siswa.id} value={siswa.id}>
-                    {siswa.nama} - Kelas {siswa.kelas?.nama_kelas || 'Tanpa Kelas'}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
+            {/* ✅ SEARCHABLE SISWA SELECT */}
+            <SearchableSiswaSelect
+              siswaList={siswaList}
+              value={nominalForm.siswa_id}
+              onChange={(siswaId) => setNominalForm({...nominalForm, siswa_id: siswaId})}
+            />
 
+            {/* Tahun field */}
             <Form.Group className="mb-3">
-              <Form.Label>Semester <span className="text-danger">*</span></Form.Label>
+              <Form.Label>Tahun Ajaran <span className="text-danger">*</span></Form.Label>
               <Form.Select
-                value={nominalForm.semester_id}
-                onChange={(e) => setNominalForm({...nominalForm, semester_id: e.target.value})}
+                value={nominalForm.tahun}
+                onChange={(e) => setNominalForm({...nominalForm, tahun: parseInt(e.target.value)})}
                 required
               >
-                <option value="">-- Pilih Semester --</option>
-                {semesterList.map(sem => (
-                  <option key={sem.id} value={sem.id}>
-                    {sem.nama} - {sem.tahun_ajaran}
+                {tahunOptions.map(tahun => (
+                  <option key={tahun} value={tahun}>
+                    {tahun}/{tahun + 1}
                   </option>
                 ))}
               </Form.Select>
@@ -575,7 +619,7 @@ export default function TuitionFee() {
         </Form>
       </Modal>
 
-      {/* Modal Detail - Same structure */}
+      {/* Modal Detail */}
       <Modal show={showDetailModal} onHide={() => setShowDetailModal(false)} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>Detail Tagihan Tuition Fee</Modal.Title>
@@ -591,7 +635,8 @@ export default function TuitionFee() {
                       <p className="mb-1"><strong>NIS:</strong> {selectedSiswa.siswa.nis || '-'}</p>
                     </Col>
                     <Col md={6}>
-                      <p className="mb-1"><strong>Kelas:</strong> {selectedSiswa.siswa.kelas?.nama || '-'}</p>
+                      <p className="mb-1"><strong>Kelas:</strong> {selectedSiswa.siswa.kelas?.nama_kelas || '-'}</p>
+                      <p className="mb-1"><strong>Tahun:</strong> {selectedTahun}/{parseInt(selectedTahun) + 1}</p>
                     </Col>
                   </Row>
                 </Card.Body>
@@ -604,15 +649,18 @@ export default function TuitionFee() {
                     <th className="text-end">Tagihan</th>
                     <th className="text-end">Dibayar</th>
                     <th className="text-end">Sisa</th>
+                    <th>Batas Bayar</th>
                     <th className="text-center">Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {BULAN_AJARAN.map(bulan => {
-                    const tagihan = selectedSiswa.tagihan[bulan];
+                  {bulanDisplay.map(item => {
+                    const tagihan = selectedSiswa.tagihan[item.key];
+                    const overdue = tagihan && isOverdue(tagihan.batas_bayar) && tagihan.status !== 'LUNAS';
+                    
                     return (
-                      <tr key={bulan}>
-                        <td>{NAMA_BULAN[bulan]}</td>
+                      <tr key={item.key}>
+                        <td>{item.label}</td>
                         <td className="text-end">
                           {tagihan ? formatRupiah(tagihan.nominal) : '-'}
                         </td>
@@ -622,10 +670,21 @@ export default function TuitionFee() {
                         <td className="text-end">
                           {tagihan ? formatRupiah(tagihan.sisa) : '-'}
                         </td>
+                        <td>
+                          {tagihan?.batas_bayar ? (
+                            <span className={overdue ? 'text-danger fw-bold' : ''}>
+                              {new Date(tagihan.batas_bayar).toLocaleDateString('id-ID')}
+                              {overdue && ' ⚠️'}
+                            </span>
+                          ) : '-'}
+                        </td>
                         <td className="text-center">
                           {tagihan ? (
-                            <Badge bg={tagihan.status === 'lunas' ? 'success' : 'warning'}>
-                              {tagihan.status === 'lunas' ? 'LUNAS' : 'BELUM LUNAS'}
+                            <Badge bg={
+                              tagihan.status === 'LUNAS' ? 'success' : 'warning'
+                            }>
+                              {tagihan.status === 'LUNAS' ? 'LUNAS' : 
+                               overdue ? 'TERLAMBAT' : 'BELUM LUNAS'}
                             </Badge>
                           ) : <Badge bg="secondary">-</Badge>}
                         </td>
@@ -641,7 +700,7 @@ export default function TuitionFee() {
                     <td className="text-end fw-bold text-danger">
                       {formatRupiah(selectedSiswa.totalTagihan - selectedSiswa.totalDibayar)}
                     </td>
-                    <td></td>
+                    <td colSpan="2"></td>
                   </tr>
                 </tfoot>
               </Table>

@@ -2,7 +2,9 @@ import api from "./api";
 
 // ADMIN
 export const createPengumuman = (data) =>
-  api.post("/pengumuman", data);
+    api.post("/pengumuman", data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    });
 
 export const getAllPengumuman = () =>
   api.get("/pengumuman");

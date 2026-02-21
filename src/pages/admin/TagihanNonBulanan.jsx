@@ -31,6 +31,7 @@ import {
 import { getSiswa } from "../../services/siswaApi";
 import { getSemester } from "../../services/semesterApi";
 import { getKelas } from "../../services/kelasApi";
+import AddTagihanModal from "../../components/addTagihanModal";
 
 export default function TagihanNonBulanan({ jenisTagihan }) {
   const [loading, setLoading] = useState(true);
@@ -49,6 +50,7 @@ export default function TagihanNonBulanan({ jenisTagihan }) {
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedTagihan, setSelectedTagihan] = useState(null);
+  
   const getBulanNama = (bulan) => {
     const namaBulan = [
       'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -240,8 +242,8 @@ const filteredData = (tagihanData || []).filter(t =>
 );
   const stats = {
     total: filteredData.length,
-    lunas: filteredData.filter(t => t.status === "lunas").length,
-    belumLunas: filteredData.filter(t => t.status === "belum_lunas").length,
+    lunas: filteredData.filter(t => t.status === "LUNAS").length,
+    belumLunas: filteredData.filter(t => t.status === "BELUM_BAYAR").length,
     totalTagihan: filteredData.reduce((sum, t) => sum + parseFloat(t.nominal_tagihan || 0), 0),
     totalDibayar: filteredData.reduce((sum, t) => sum + parseFloat(t.total_dibayar || 0), 0),
     totalSisa: filteredData.reduce((sum, t) => sum + parseFloat(t.sisa || 0), 0),
@@ -372,7 +374,7 @@ const filteredData = (tagihanData || []).filter(t =>
               >
                 <option value="all">Semua Status</option>
                 <option value="lunas">Lunas</option>
-                <option value="belum_lunas">Belum Lunas</option>
+                <option value="belum_bayar">Belum Lunas</option>
               </Form.Select>
             </Col>
 
@@ -453,8 +455,8 @@ const filteredData = (tagihanData || []).filter(t =>
                       <td className="text-end text-success fw-medium">{formatRupiah(tagihan.total_dibayar)}</td>
                       <td className="text-end text-danger fw-bold">{formatRupiah(tagihan.sisa)}</td>
                       <td className="text-center">
-                        <Badge bg={tagihan.status === "lunas" ? "success" : "warning"}>
-                          {tagihan.status === "lunas" ? "Lunas" : "Belum Lunas"}
+                        <Badge bg={tagihan.status === "LUNAS" ? "success" : "warning"}>
+                          {tagihan.status === "LUNAS" ? "Lunas" : "Belum Lunas"}
                         </Badge>
                       </td>
                       <td className="text-center">
@@ -466,7 +468,7 @@ const filteredData = (tagihanData || []).filter(t =>
                         >
                           <Eye size={14} />
                         </Button>
-                        {tagihan.total_dibayar === 0 && (
+                        {tagihan.total_dibayar <= 0 && (
                           <Button
                             size="sm"
                             variant="outline-danger"
@@ -514,6 +516,7 @@ const filteredData = (tagihanData || []).filter(t =>
         currentLabel={currentLabel}
         formatRupiah={formatRupiah}
         namaBulan={namaBulan}
+        loading={loading}
       />
 
       {/* Bulk Modal */}
@@ -536,141 +539,142 @@ const filteredData = (tagihanData || []).filter(t =>
         tagihan={selectedTagihan}
         formatRupiah={formatRupiah}
         currentLabel={currentLabel}
+        isOverdue={isOverdue}
       />
     </Container>
   );
 }
 
 // Simple modals (reuse dari Tagihan_Complete.jsx tapi simplified)
-function AddTagihanModal({ show, onHide, formData, setFormData, siswaList, semesterList, onSubmit, currentLabel, formatRupiah, namaBulan }) {
-  return (
-    <Modal show={show} onHide={onHide} size="lg">
-      <Modal.Header closeButton>
-        <Modal.Title>Tambah Tagihan {currentLabel}</Modal.Title>
-      </Modal.Header>
-      <Form onSubmit={onSubmit}>
-        <Modal.Body>
-          <Row>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>Siswa <span className="text-danger">*</span></Form.Label>
-                <Form.Select
-                  value={formData.siswa_id}
-                  onChange={(e) => setFormData({ ...formData, siswa_id: e.target.value })}
-                  required
-                >
-                  <option value="">Pilih Siswa</option>
-                  {siswaList.map(siswa => (
-                    <option key={siswa.id} value={siswa.id}>
-                      {siswa.nis} - {siswa.nama}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-            </Col>
+// function AddTagihanModal({ show, onHide, formData, setFormData, siswaList, semesterList, onSubmit, currentLabel, formatRupiah, namaBulan }) {
+//   return (
+//     <Modal show={show} onHide={onHide} size="lg">
+//       <Modal.Header closeButton>
+//         <Modal.Title>Tambah Tagihan {currentLabel}</Modal.Title>
+//       </Modal.Header>
+//       <Form onSubmit={onSubmit}>
+//         <Modal.Body>
+//           <Row>
+//             <Col md={6}>
+//               <Form.Group className="mb-3">
+//                 <Form.Label>Siswa <span className="text-danger">*</span></Form.Label>
+//                 <Form.Select
+//                   value={formData.siswa_id}
+//                   onChange={(e) => setFormData({ ...formData, siswa_id: e.target.value })}
+//                   required
+//                 >
+//                   <option value="">Pilih Siswa</option>
+//                   {siswaList.map(siswa => (
+//                     <option key={siswa.id} value={siswa.id}>
+//                       {siswa.nis} - {siswa.nama}
+//                     </option>
+//                   ))}
+//                 </Form.Select>
+//               </Form.Group>
+//             </Col>
 
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>Semester <span className="text-danger">*</span></Form.Label>
-                <Form.Select
-                  value={formData.semester_id}
-                  onChange={(e) => setFormData({ ...formData, semester_id: e.target.value })}
-                  required
-                >
-                  <option value="">Pilih Semester</option>
-                  {semesterList.map(sem => (
-                    <option key={sem.id} value={sem.id}>
-                      {sem.nama} - {sem.tahun_ajaran}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-            </Col>
+//             <Col md={6}>
+//               <Form.Group className="mb-3">
+//                 <Form.Label>Semester <span className="text-danger">*</span></Form.Label>
+//                 <Form.Select
+//                   value={formData.semester_id}
+//                   onChange={(e) => setFormData({ ...formData, semester_id: e.target.value })}
+//                   required
+//                 >
+//                   <option value="">Pilih Semester</option>
+//                   {semesterList.map(sem => (
+//                     <option key={sem.id} value={sem.id}>
+//                       {sem.nama} - {sem.tahun_ajaran}
+//                     </option>
+//                   ))}
+//                 </Form.Select>
+//               </Form.Group>
+//             </Col>
 
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>Periode</Form.Label>
-                <Form.Select
-                  value={formData.periode}
-                  onChange={(e) => setFormData({ ...formData, periode: e.target.value })}
-                >
-                  <option value="">Pilih Periode</option>
-                  <option value="Semester 1">Semester 1</option>
-                  <option value="Semester 2">Semester 2</option>
-                  <option value="Tahunan">Tahunan</option>
-                </Form.Select>
-              </Form.Group>
-            </Col>
-            <Col md={4}>
-                <Form.Label>Bulan</Form.Label>
-                <Form.Select
-                  value={formData.bulan}
-                  onChange={(e) => setFormData({ ...formData, bulan: e.target.value })}
-                >
-                  <option value="">Pilih bulan</option>
-                  {namaBulan.map((bulan, index) => (
-                    <option key={index+1} value={index + 1}>{bulan}</option>
-                  ))}
-                </Form.Select>
-            </Col>      
-            <Col md={2}>
-              <Form.Group className="mb-3">
-                <Form.Label>Tahun <span className="text-danger">*</span></Form.Label>
-                <Form.Control
-                  type="number"
-                  value={formData.tahun}
-                  onChange={(e) => setFormData({ ...formData, tahun: e.target.value })}
-                  required
-                  min="2020"
-                  max="2030"
-                />
-              </Form.Group>
-            </Col>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>Batas Bayar</Form.Label>
-                <Form.Control
-                  type="date"
-                  value={formData.batas_bayar}
-                  onChange={(e) => setFormData({ ...formData, batas_bayar: e.target.value })}
-                  min={new Date().toISOString().split('T')[0]}
-                />
-                <Form.Text className="text-muted">
-                  Kosongkan jika tidak ada batas waktu
-                </Form.Text>
-              </Form.Group>
-            </Col>        
-            <Col md={12}>
-              <Form.Group className="mb-3">
-                <Form.Label>Nominal Tagihan <span className="text-danger">*</span></Form.Label>
-                <InputGroup>
-                  <InputGroup.Text>Rp</InputGroup.Text>
-                  <Form.Control
-                    type="number"
-                    value={formData.nominal_tagihan}
-                    onChange={(e) => setFormData({ ...formData, nominal_tagihan: e.target.value })}
-                    required
-                    min="0"
-                  />
-                </InputGroup>
-                {formData.nominal_tagihan && (
-                  <Form.Text className="text-muted">
-                    {formatRupiah(formData.nominal_tagihan)}
-                  </Form.Text>
-                )}
-              </Form.Group>
-            </Col>
+//             <Col md={6}>
+//               <Form.Group className="mb-3">
+//                 <Form.Label>Periode</Form.Label>
+//                 <Form.Select
+//                   value={formData.periode}
+//                   onChange={(e) => setFormData({ ...formData, periode: e.target.value })}
+//                 >
+//                   <option value="">Pilih Periode</option>
+//                   <option value="Semester 1">Semester 1</option>
+//                   <option value="Semester 2">Semester 2</option>
+//                   <option value="Tahunan">Tahunan</option>
+//                 </Form.Select>
+//               </Form.Group>
+//             </Col>
+//             <Col md={4}>
+//                 <Form.Label>Bulan</Form.Label>
+//                 <Form.Select
+//                   value={formData.bulan}
+//                   onChange={(e) => setFormData({ ...formData, bulan: e.target.value })}
+//                 >
+//                   <option value="">Pilih bulan</option>
+//                   {namaBulan.map((bulan, index) => (
+//                     <option key={index+1} value={index + 1}>{bulan}</option>
+//                   ))}
+//                 </Form.Select>
+//             </Col>      
+//             <Col md={2}>
+//               <Form.Group className="mb-3">
+//                 <Form.Label>Tahun <span className="text-danger">*</span></Form.Label>
+//                 <Form.Control
+//                   type="number"
+//                   value={formData.tahun}
+//                   onChange={(e) => setFormData({ ...formData, tahun: e.target.value })}
+//                   required
+//                   min="2020"
+//                   max="2030"
+//                 />
+//               </Form.Group>
+//             </Col>
+//             <Col md={6}>
+//               <Form.Group className="mb-3">
+//                 <Form.Label>Batas Bayar</Form.Label>
+//                 <Form.Control
+//                   type="date"
+//                   value={formData.batas_bayar}
+//                   onChange={(e) => setFormData({ ...formData, batas_bayar: e.target.value })}
+//                   min={new Date().toISOString().split('T')[0]}
+//                 />
+//                 <Form.Text className="text-muted">
+//                   Kosongkan jika tidak ada batas waktu
+//                 </Form.Text>
+//               </Form.Group>
+//             </Col>        
+//             <Col md={12}>
+//               <Form.Group className="mb-3">
+//                 <Form.Label>Nominal Tagihan <span className="text-danger">*</span></Form.Label>
+//                 <InputGroup>
+//                   <InputGroup.Text>Rp</InputGroup.Text>
+//                   <Form.Control
+//                     type="number"
+//                     value={formData.nominal_tagihan}
+//                     onChange={(e) => setFormData({ ...formData, nominal_tagihan: e.target.value })}
+//                     required
+//                     min="0"
+//                   />
+//                 </InputGroup>
+//                 {formData.nominal_tagihan && (
+//                   <Form.Text className="text-muted">
+//                     {formatRupiah(formData.nominal_tagihan)}
+//                   </Form.Text>
+//                 )}
+//               </Form.Group>
+//             </Col>
             
-          </Row>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={onHide}>Batal</Button>
-          <Button variant="primary" type="submit">Simpan</Button>
-        </Modal.Footer>
-      </Form>
-    </Modal>
-  );
-}
+//           </Row>
+//         </Modal.Body>
+//         <Modal.Footer>
+//           <Button variant="secondary" onClick={onHide}>Batal</Button>
+//           <Button variant="primary" type="submit">Simpan</Button>
+//         </Modal.Footer>
+//       </Form>
+//     </Modal>
+//   );
+// }
 
 function BulkTagihanModal({ show, onHide, formData, setFormData, kelasList, semesterList, onSubmit, currentLabel, formatRupiah }) {
   return (
@@ -781,7 +785,7 @@ function BulkTagihanModal({ show, onHide, formData, setFormData, kelasList, seme
   );
 }
 
-function DetailTagihanModal({ show, onHide, tagihan, formatRupiah, currentLabel }) {
+function DetailTagihanModal({ show, onHide, tagihan, formatRupiah, currentLabel, isOverdue }) {
   if (!tagihan) return null;
 
   return (

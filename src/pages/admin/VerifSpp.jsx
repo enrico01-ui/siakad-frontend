@@ -574,7 +574,7 @@ function DetailPembayaranModal({
                           onClick={() => setShowImageModal(true)}
                           thumbnail
                         />
-                        {console.log("Bukti Transfer URL:", `${import.meta.env.VITE_API_URL}/storage/${payment.bukti_transfer}`)}
+                        {console.log("Bukti Transfer URL:", payment.bukti_transfer)}
                         <div className="mt-2">
                           <Button 
                             size="sm" 
