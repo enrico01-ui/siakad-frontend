@@ -97,11 +97,12 @@ function SignInForm() {
         
         <span>use your account</span>
         <input
-          type="username"
+          type="text"
           placeholder="username"
           name="username"
           value={state.username}
           onChange={handleChange}
+          autoComplete="username"
         />
         <input
           type="password"
@@ -109,6 +110,7 @@ function SignInForm() {
           placeholder="Password"
           value={state.password}
           onChange={handleChange}
+          autoComplete="current-password"
         />
         <ReCAPTCHA
           sitekey="6LfuUXMsAAAAAMm9qHQqbchYj0-ELQ-izWUkQJoX"
