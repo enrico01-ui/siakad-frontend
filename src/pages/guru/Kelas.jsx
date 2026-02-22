@@ -501,7 +501,7 @@ export default function Kelas() {
                       <tbody>
                         {getSiswaRapor(selectedSiswa.id).map(rapor => (
                           <tr key={rapor.id}>
-                            <td>Semester {rapor.semester}</td>
+                            <td>Semester {rapor.semester?.nama ?? rapor.semester ?? '-'}</td>
                             <td>{rapor.tahun_ajaran}</td>
                             <td>
                               <Button
@@ -656,7 +656,7 @@ function TableRapor({ data, onDelete }) {
                     {rapor.siswa?.kelas?.nama_kelas || '-'}
                   </Badge>
                 </td>
-                <td>Semester {rapor.semester}</td>
+                <td>Semester {rapor.semester?.nama ?? rapor.semester ?? '-'}</td>
                 <td>{rapor.tahun_ajaran}</td>
                 <td>
                   {rapor.uploaded_at 
