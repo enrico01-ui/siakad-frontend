@@ -41,7 +41,14 @@ const isWeekend = (dateStr) => {
   const day = d.getDay();
   return day === 0 || day === 6; // Sunday or Saturday
 };
-
+const totalWeekendInMonth = (month, year) => {
+  const daysInMonth = new Date(year, month, 0).getDate();
+  let count = 0;
+  for (let d = 1; d <= daysInMonth; d++) {
+    if (isWeekend(`${year}-${String(month).padStart(2, "0")}-${String(d).padStart(2, "0")}`)) count++;
+  }
+  return count;
+};
 // Hitung jumlah hari kerja dalam sebulan (exclude weekend + libur nasional)
 const hitungHariKerja = (month, year, hariLibur = []) => {
   const daysInMonth = new Date(year, month, 0).getDate();
@@ -1011,7 +1018,7 @@ function TableLaporanBulanan({ data, month, year, semester, hariKerja, hariLibur
       <Alert variant="light" className="border mb-3 no-print" style={{ fontSize: "0.85rem" }}>
         📅 <strong>Hari Kerja Bulan {getBulanNama(month)} {year}:</strong> {hariKerja} hari
         {hariLibur.length > 0 && (
-          <span className="text-info ms-2">({hariLibur.length} hari libur nasional & {4} minggu weekend dikecualikan)</span>
+          <span className="text-info ms-2">({hariLibur.length} hari libur nasional & {totalWeekendInMonth(month, year)} minggu weekend dikecualikan)</span>
         )}
       </Alert>
 
