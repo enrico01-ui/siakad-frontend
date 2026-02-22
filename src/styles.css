@@ -100,7 +100,9 @@
   color: black;
   border: none;
   padding: 12px 15px;
-  border-radius: 8px;  
+  border-radius: 8px;
+  width: 100%;
+  max-width: 300px;
   margin: 8px 0;
   width: 100%;
 }
