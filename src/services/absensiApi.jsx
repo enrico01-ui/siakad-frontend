@@ -8,9 +8,11 @@ export const getAbsensiById = (guruId) => api.get(`/absensi-guru/${guruId}`);
 export const generateLaporanPDF = (sesiId) => api.get(`/sesi-absensi/${sesiId}/laporan-pdf`, {
   responseType: 'blob'
 });
-export const generateLaporanBulanan = () => api.get(`/laporan/absensi-bulanan`, {
-  responseType: 'blob'
-});
+export const generateLaporanBulanan = (bulan, tahun, semesterId) =>
+    api.get("/laporan/absensi-bulanan", {
+        params: { bulan, tahun, semester_id: semesterId },
+        responseType: "blob", // ✅ penting untuk PDF
+    });
 // Sesi Absensi
 export const getSesiAbsensi = () => api.get("/sesi-absensi");
 export const getSesiAbsensiAktif = () => api.get("/sesi-absensi/aktif");

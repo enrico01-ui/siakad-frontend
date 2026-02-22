@@ -771,7 +771,7 @@ function TableRapor({ data, searchTerm }) {
     item.siswa?.nama?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.tahun_ajaran?.includes(searchTerm)
   );
-
+  console.log("Filtered Rapor:", filtered);
   return (
     <Table hover responsive>
       <thead className="table-light">

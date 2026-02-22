@@ -370,23 +370,28 @@ export default function AbsensiGuru() {
 
   const handleGeneratePDFBulanan = async () => {
     try {
-      setLoading(true);
-      const response = await generateLaporanBulanan();
-      const blob = new Blob([response.data], { type: "application/pdf" });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `Laporan_Absensi_${getBulanNama(selectedMonth)}_${selectedYear}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch {
-      alert("Gagal generate PDF bulanan!");
+        setLoading(true);
+        const response = await generateLaporanBulanan(
+            selectedMonth,
+            selectedYear,
+            filterSemester !== "all" ? filterSemester : null
+        );
+        const blob = new Blob([response.data], { type: "application/pdf" });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `Laporan_Absensi_${getBulanNama(selectedMonth)}_${selectedYear}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+    } catch (err) {
+        console.error(err);
+        alert("Gagal generate PDF bulanan!");
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
 
   const getAbsensiStatusBadge = (status) => {
     const map = { masuk: ["info", "Masuk"], pulang: ["success", "Pulang"], izin: ["warning", "Izin"] };
