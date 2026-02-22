@@ -1018,7 +1018,7 @@ function TableLaporanBulanan({ data, month, year, semester, hariKerja, hariLibur
       <Alert variant="light" className="border mb-3 no-print" style={{ fontSize: "0.85rem" }}>
         📅 <strong>Hari Kerja Bulan {getBulanNama(month)} {year}:</strong> {hariKerja} hari
         {hariLibur.length > 0 && (
-          <span className="text-info ms-2">({hariLibur.length} hari libur nasional & {totalWeekendInMonth(month, year)} minggu weekend dikecualikan)</span>
+          <span className="text-info ms-2">({hariLibur.length} hari libur nasional & {totalWeekendInMonth(month, year)} hari weekend dikecualikan)</span>
         )}
       </Alert>
 
