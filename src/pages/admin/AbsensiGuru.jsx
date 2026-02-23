@@ -120,8 +120,25 @@ const getBulanNama = (bulan) => {
 
 const formatTime = (time) => {
   if (!time) return "-";
-  if (typeof time === "string" && time.includes(":")) return time.substring(0, 5);
-  return new Date(time).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  
+  // Jika input sudah berupa format "HH:mm:ss" atau sejenisnya
+  if (typeof time === "string" && time.includes(":") && !time.includes("T")) {
+    return time.substring(0, 5);
+  }
+
+  try {
+    const date = new Date(time);
+    // Validasi apakah string tanggal valid sebelum di-render
+    if (isNaN(date.getTime())) return "-";
+    
+    return date.toLocaleTimeString("id-ID", { 
+      hour: "2-digit", 
+      minute: "2-digit",
+      hour12: false 
+    }).replace(".", ":"); // Memastikan format jam Indonesia menggunakan titik dua
+  } catch (e) {
+    return "-";
+  }
 };
 
 const formatDuration = (minutes) => {
@@ -982,8 +999,8 @@ function TableSesi({ data, onViewDetail }) {
               <td>{new Date(sesi.jam_mulai).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</td>
               <td className="fw-medium">{sesi.guru?.nama || "-"}</td>
               <td>{sesi.guru?.nip || "-"}</td>
-              <td>{sesi.jam_mulai}</td>
-              <td>{sesi.jam_selesai || <span className="text-muted">Belum keluar</span>}</td>
+              <td>{formatTime(sesi.jam_mulai)}</td>
+              <td>{formatTime(sesi.jam_selesai) || <span className="text-muted">Belum keluar</span>}</td>
               <td>{sesi.durasi_menit} menit</td>
               <td><Badge bg="secondary">{sesi.semester?.nama || "-"}</Badge></td>
               <td><StatusBadge statusTampilan={statusTampilan} /></td>
