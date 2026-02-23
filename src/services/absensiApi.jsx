@@ -14,7 +14,7 @@ export const generateLaporanBulanan = (bulan, tahun, semesterId) =>
         responseType: "blob", // ✅ penting untuk PDF
     });
 // Sesi Absensi
-export const getSesiAbsensi = () => api.get("/sesi-absensi");
+export const getSesiAbsensi = (params) => api.get("/sesi-absensi", { params });
 export const getSesiAbsensiAktif = () => api.get("/sesi-absensi/aktif");
 export const createSesiAbsensi = (data) => api.post("/sesi-absensi", data);
 export const closeSesiAbsensi = (id, data) => api.post(`/sesi-absensi/${id}/close`, data);
