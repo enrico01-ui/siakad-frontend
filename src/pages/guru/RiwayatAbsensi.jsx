@@ -86,8 +86,10 @@ export default function RiwayatAbsensi() {
     izin: absensiList.filter(s => ["izin", "cuti"].includes(s.status)).length,
     terlambat: absensiList.filter(s => s.status === "izin_terlambat").length,
     alpha: absensiList.filter(s => s.status === "invalid").length,
-    totalJam: absensiList.filter(s => s.status === "valid")
-      .reduce((sum, s) => sum + (s.total_jam || 0), 0).toFixed(1),
+    totalJam: absensiList
+        .filter(s => s.status === "valid")
+        .reduce((sum, s) => sum + (parseFloat(s.total_jam) || 0), 0)
+        .toFixed(1),
   };
 
   const formatJam = (dateStr) =>

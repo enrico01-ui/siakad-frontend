@@ -3,11 +3,12 @@ import { useEffect, useState } from "react";
 import {
   Book, People, FileEarmarkArrowUp, Calendar, Clock,
   CheckCircle, Megaphone, PersonCircle, ChevronRight,
-  FileEarmarkPdf, XCircle
+  FileEarmarkPdf, XCircle, ClockHistory, PersonCheck
 } from "react-bootstrap-icons";
 import { getGuruKelas, getKelasSiswa } from "../../services/guruApi";
 import { getRapor } from "../../services/raporApi";
 import { getPengumumanGuru } from "../../services/pengumumanApi";
+import { getSesiAbsensi } from "../../services/absensiApi"; // ✅ tambah import
 
 export default function DashboardGuru() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -18,6 +19,7 @@ export default function DashboardGuru() {
   const [siswaList, setSiswaList] = useState([]);
   const [raporList, setRaporList] = useState([]);
   const [pengumumanList, setPengumumanList] = useState([]);
+  const [absensiList, setAbsensiList] = useState([]); // ✅ tambah state
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,8 +30,11 @@ export default function DashboardGuru() {
     try {
       setLoading(true);
 
+      // ✅ Fetch absensi untuk semua role guru
+      const absensiRes = await getSesiAbsensi({ guru_id: guru?.id });
+      setAbsensiList(absensiRes.data || []);
+
       if (isWaliKelas) {
-        // Fetch kelas & siswa
         const kelasRes = await getGuruKelas();
         const kelas = kelasRes.data.kelas || [];
         setKelasList(kelas);
@@ -41,11 +46,9 @@ export default function DashboardGuru() {
         }
         setSiswaList(allSiswa);
 
-        // Fetch rapor
         const raporRes = await getRapor();
         setRaporList(raporRes.data || []);
 
-        // Fetch pengumuman
         const pengRes = await getPengumumanGuru();
         setPengumumanList(pengRes.data || []);
       }
@@ -55,6 +58,22 @@ export default function DashboardGuru() {
       setLoading(false);
     }
   };
+
+  // ✅ Hitung statistik absensi
+  const absensiStats = {
+    totalHadir: absensiList.filter(s => s.status === 'valid').length,
+    totalIzin: absensiList.filter(s => ['izin', 'izin_terlambat', 'cuti'].includes(s.status)).length,
+    totalInvalid: absensiList.filter(s => s.status === 'invalid').length,
+    totalJam: absensiList
+      .filter(s => s.status === "valid")
+      .reduce((sum, s) => sum + (parseFloat(s.total_jam) || 0), 0)
+      .toFixed(1),
+  };
+
+  // ✅ Ambil 5 riwayat terbaru
+  const recentAbsensi = [...absensiList]
+    .sort((a, b) => new Date(b.jam_mulai) - new Date(a.jam_mulai))
+    .slice(0, 5);
 
   const siswaWithRapor = siswaList.filter(s =>
     raporList.some(r => r.siswa_id === s.id)
@@ -68,6 +87,24 @@ export default function DashboardGuru() {
     new Date(dateStr).toLocaleDateString("id-ID", {
       day: "numeric", month: "short", year: "numeric"
     });
+
+  const formatJam = (dateStr) =>
+    new Date(dateStr).toLocaleTimeString("id-ID", {
+      hour: "2-digit", minute: "2-digit"
+    });
+
+  const getStatusBadge = (status) => {
+    const map = {
+      valid: { bg: "success", label: "Hadir" },
+      belum_selesai: { bg: "warning", label: "Aktif" },
+      invalid: { bg: "danger", label: "Invalid" },
+      izin: { bg: "info", label: "Izin" },
+      izin_terlambat: { bg: "warning", label: "Terlambat" },
+      cuti: { bg: "secondary", label: "Cuti" },
+    };
+    const s = map[status] || { bg: "secondary", label: status };
+    return <Badge bg={s.bg}>{s.label}</Badge>;
+  };
 
   return (
     <Container fluid className="p-4" style={{ backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
@@ -130,33 +167,89 @@ export default function DashboardGuru() {
               ))}
             </Row>
           ) : (
-            // Guru biasa — hanya kehadiran
+            // ✅ Guru biasa — stats absensi
             <Row className="g-3 mb-4">
-              <Col lg={3} md={6}>
-                <Card className="border-0 shadow-sm">
-                  <Card.Body className="d-flex align-items-center justify-content-between">
-                    <div>
-                      <p className="text-muted mb-1 small">Kehadiran Hari Ini</p>
-                      <h3 className="mb-0 fw-bold text-success">-</h3>
-                    </div>
-                    <div className="bg-success bg-opacity-10 p-3 rounded-3">
-                      <CheckCircle size={28} className="text-success" />
-                    </div>
-                  </Card.Body>
-                </Card>
-              </Col>
+              {[
+                { title: "Total Hadir", value: absensiStats.totalHadir, color: "success", bg: "#f0fdf4", Icon: PersonCheck },
+                { title: "Total Izin", value: absensiStats.totalIzin, color: "warning", bg: "#fffbeb", Icon: Calendar },
+                { title: "Total Alpha", value: absensiStats.totalInvalid, color: "danger", bg: "#fff1f2", Icon: XCircle },
+                { title: "Total Jam Kerja", value: `${absensiStats.totalJam} jam`, color: "info", bg: "#f0f9ff", Icon: Clock },
+              ].map(({ title, value, color, bg, Icon }) => (
+                <Col key={title} lg={3} md={6}>
+                  <Card className="border-0 shadow-sm h-100">
+                    <Card.Body className="d-flex align-items-center justify-content-between">
+                      <div>
+                        <p className="text-muted mb-1 small">{title}</p>
+                        <h3 className={`mb-0 fw-bold text-${color}`}>{value}</h3>
+                      </div>
+                      <div className="d-flex align-items-center justify-content-center rounded-3"
+                        style={{ width: 60, height: 60, backgroundColor: bg }}>
+                        <Icon size={28} className={`text-${color}`} />
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              ))}
             </Row>
           )}
 
-          {/* ── WALI KELAS CONTENT ── */}
-          {isWaliKelas && (
-            <Row className="g-3">
+          {/* ── RIWAYAT ABSENSI — tampil untuk SEMUA role ── */}
+          <Row className="g-3 mb-4">
+            <Col lg={isWaliKelas ? 5 : 12}>
+              <Card className="border-0 shadow-sm h-100">
+                <Card.Body>
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <h5 className="fw-bold mb-0">
+                      <ClockHistory size={20} className="me-2 text-primary" />
+                      Riwayat Absensi Terbaru
+                    </h5>
+                    <Badge bg="primary" pill>{absensiList.length} total</Badge>
+                  </div>
 
-              {/* ── KELAS & SISWA ── */}
+                  {recentAbsensi.length === 0 ? (
+                    <div className="text-center py-4 text-muted">
+                      <ClockHistory size={40} className="mb-2 opacity-25" />
+                      <p className="mb-0 small">Belum ada riwayat absensi</p>
+                    </div>
+                  ) : (
+                    <Table hover size="sm" className="mb-0">
+                      <thead className="table-light">
+                        <tr>
+                          <th>Tanggal</th>
+                          <th>Jam Masuk</th>
+                          <th>Jam Pulang</th>
+                          <th>Durasi</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {recentAbsensi.map(sesi => (
+                          <tr key={sesi.id}>
+                            <td>{formatDate(sesi.jam_mulai)}</td>
+                            <td>{formatJam(sesi.jam_mulai)}</td>
+                            <td>{sesi.jam_selesai ? formatJam(sesi.jam_selesai) : '-'}</td>
+                            <td>
+                              {sesi.durasi_menit
+                                ? `${Math.floor(sesi.durasi_menit / 60)}j ${sesi.durasi_menit % 60}m`
+                                : '-'}
+                            </td>
+                            <td>{getStatusBadge(sesi.status)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  )}
+                </Card.Body>
+              </Card>
+            </Col>
+
+            {/* ── WALI KELAS: Pengumuman di samping riwayat ── */}
+            {isWaliKelas && (
               <Col lg={7}>
-                <Card className="border-0 shadow-sm h-100">
+                {/* Kelas & Siswa */}
+                <Card className="border-0 shadow-sm">
                   <Card.Body>
-                    <div className="d-flex justify-content-between align-items-center mb-4">
+                    <div className="d-flex justify-content-between align-items-center mb-3">
                       <h5 className="fw-bold mb-0">
                         <People size={20} className="me-2 text-primary" />
                         Data Kelas
@@ -164,8 +257,7 @@ export default function DashboardGuru() {
                       <Badge bg="primary" pill>{siswaList.length} siswa</Badge>
                     </div>
 
-                    {/* Progress Rapor */}
-                    <Card className="bg-light border-0 mb-4">
+                    <Card className="bg-light border-0 mb-3">
                       <Card.Body className="py-3">
                         <div className="d-flex justify-content-between mb-2">
                           <small className="fw-semibold">Progress Upload Rapor</small>
@@ -183,14 +275,12 @@ export default function DashboardGuru() {
                       </Card.Body>
                     </Card>
 
-                    {/* Tabel siswa */}
-                    <div style={{ maxHeight: 320, overflowY: "auto" }}>
+                    <div style={{ maxHeight: 250, overflowY: "auto" }}>
                       <Table hover size="sm" className="mb-0">
                         <thead className="table-light sticky-top">
                           <tr>
                             <th>No</th>
                             <th>Nama Siswa</th>
-                            <th>NIS</th>
                             <th>Kelas</th>
                             <th className="text-center">Rapor</th>
                           </tr>
@@ -202,7 +292,6 @@ export default function DashboardGuru() {
                               <tr key={siswa.id}>
                                 <td className="text-muted">{i + 1}</td>
                                 <td className="fw-medium">{siswa.nama}</td>
-                                <td className="text-muted">{siswa.nis || "-"}</td>
                                 <td>
                                   <Badge bg="secondary" className="fw-normal">
                                     {siswa.kelas?.nama_kelas || "-"}
@@ -218,7 +307,7 @@ export default function DashboardGuru() {
                             );
                           }) : (
                             <tr>
-                              <td colSpan={5} className="text-center text-muted py-3">
+                              <td colSpan={4} className="text-center text-muted py-3">
                                 Belum ada data siswa
                               </td>
                             </tr>
@@ -229,12 +318,16 @@ export default function DashboardGuru() {
                   </Card.Body>
                 </Card>
               </Col>
+            )}
+          </Row>
 
-              {/* ── PENGUMUMAN ── */}
-              <Col lg={5}>
-                <Card className="border-0 shadow-sm h-100">
+          {/* ── PENGUMUMAN — hanya wali kelas ── */}
+          {isWaliKelas && (
+            <Row className="g-3">
+              <Col lg={12}>
+                <Card className="border-0 shadow-sm">
                   <Card.Body>
-                    <div className="d-flex justify-content-between align-items-center mb-4">
+                    <div className="d-flex justify-content-between align-items-center mb-3">
                       <h5 className="fw-bold mb-0">
                         <Megaphone size={20} className="me-2 text-warning" />
                         Pengumuman Saya
@@ -243,66 +336,61 @@ export default function DashboardGuru() {
                         {pengumumanList.filter(p => p.is_active).length} aktif
                       </Badge>
                     </div>
-
                     {pengumumanList.length === 0 ? (
                       <div className="text-center py-4 text-muted">
                         <Megaphone size={40} className="mb-2 opacity-25" />
                         <p className="mb-0 small">Belum ada pengumuman</p>
                       </div>
                     ) : (
-                      <div style={{ maxHeight: 420, overflowY: "auto" }}>
+                      <Row className="g-2">
                         {pengumumanList.map((p) => (
-                          <div
-                            key={p.id}
-                            className="border rounded-3 p-3 mb-2"
-                            style={{ backgroundColor: p.is_active ? "#fffbeb" : "#f8f9fa" }}
-                          >
-                            <div className="d-flex justify-content-between align-items-start mb-1">
-                              <p className="fw-semibold mb-0 me-2" style={{ fontSize: "0.9rem" }}>
-                                {p.judul}
-                              </p>
-                              {p.is_active
-                                ? <Badge bg="success" className="flex-shrink-0">Aktif</Badge>
-                                : <Badge bg="secondary" className="flex-shrink-0">Nonaktif</Badge>
-                              }
-                            </div>
-                            <p
-                              className="text-muted mb-2"
-                              style={{
-                                fontSize: "0.8rem",
-                                overflow: "hidden",
-                                display: "-webkit-box",
-                                WebkitLineClamp: 2,
-                                WebkitBoxOrient: "vertical"
-                              }}
+                          <Col key={p.id} md={6} lg={4}>
+                            <div
+                              className="border rounded-3 p-3 h-100"
+                              style={{ backgroundColor: p.is_active ? "#fffbeb" : "#f8f9fa" }}
                             >
-                              {p.isi}
-                            </p>
-                            <div className="d-flex justify-content-between align-items-center">
-                              <small className="text-muted">
-                                <Calendar size={12} className="me-1" />
-                                {formatDate(p.created_at)}
-                              </small>
-                              {p.attachments?.length > 0 && (
+                              <div className="d-flex justify-content-between align-items-start mb-1">
+                                <p className="fw-semibold mb-0 me-2" style={{ fontSize: "0.9rem" }}>
+                                  {p.judul}
+                                </p>
+                                {p.is_active
+                                  ? <Badge bg="success" className="flex-shrink-0">Aktif</Badge>
+                                  : <Badge bg="secondary" className="flex-shrink-0">Nonaktif</Badge>
+                                }
+                              </div>
+                              <p className="text-muted mb-2"
+                                style={{
+                                  fontSize: "0.8rem",
+                                  overflow: "hidden",
+                                  display: "-webkit-box",
+                                  WebkitLineClamp: 2,
+                                  WebkitBoxOrient: "vertical"
+                                }}>
+                                {p.isi}
+                              </p>
+                              <div className="d-flex justify-content-between align-items-center">
                                 <small className="text-muted">
-                                  📎 {p.attachments.length} lampiran
+                                  <Calendar size={12} className="me-1" />
+                                  {formatDate(p.created_at)}
                                 </small>
-                              )}
+                                {p.attachments?.length > 0 && (
+                                  <small className="text-muted">📎 {p.attachments.length}</small>
+                                )}
+                              </div>
                             </div>
-                          </div>
+                          </Col>
                         ))}
-                      </div>
+                      </Row>
                     )}
                   </Card.Body>
                 </Card>
               </Col>
-
             </Row>
           )}
 
           {/* ── GURU BIASA INFO ── */}
           {!isWaliKelas && (
-            <Alert variant="info">
+            <Alert variant="info" className="mt-3">
               <strong>Info:</strong> Anda login sebagai Guru Mata Pelajaran.
               Untuk melihat data kelas dan upload rapor, fitur tersebut hanya tersedia untuk Wali Kelas.
             </Alert>
