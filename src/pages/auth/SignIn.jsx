@@ -58,11 +58,12 @@ function SignInForm() {
       setTimeout(() => {
         if (role === "admin") {
           navigate("/admin");
-        } else if (role === "guru" || role === "wali_kelas") {
+        } else if (role === "guru" || role === "wali_kelas" || role === "coach" || role === "financial") {
           navigate("/guru");
         } else if (role === "siswa") {
           navigate("/siswa");
-        } else {
+        } 
+          else {
           navigate("/");
         }
       }, 800);
