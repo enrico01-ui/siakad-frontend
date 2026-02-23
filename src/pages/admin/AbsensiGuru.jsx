@@ -284,7 +284,7 @@ export default function AbsensiGuru() {
 
         switch (statusTampilan) {
           case "hadir": rekapByGuru[guruId].totalHadir++; break;
-          case "terlambat": rekapByGuru[guruId].totalTerlambat++; break;
+          case "terlambat": rekapByGuru[guruId].totalTerlambat++; rekapByGuru[guruId].totalHadir++; break;
           case "sakit": rekapByGuru[guruId].totalSakit++; break;
           case "cuti": rekapByGuru[guruId].totalCuti++; break;
           case "tidak_hadir": rekapByGuru[guruId].totalTidakHadir++; break;
