@@ -31,7 +31,12 @@ export default function DashboardGuru() {
       setLoading(true);
 
       // ✅ Fetch absensi untuk semua role guru
-      const absensiRes = await getSesiAbsensi({ guru_id: guru?.id });
+      console.log("Fetching absensi for:", { guruId: guru?.id, month: new Date().getMonth() + 1, year: new Date().getFullYear() });
+      const absensiRes = await getSesiAbsensi({
+        guru_id: guru.id,
+        month: new Date().getMonth() + 1,
+        year: new Date().getFullYear(),
+      });
       setAbsensiList(absensiRes.data || []);
 
       if (isWaliKelas) {

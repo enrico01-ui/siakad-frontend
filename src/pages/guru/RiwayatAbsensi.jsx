@@ -26,6 +26,7 @@ export default function RiwayatAbsensi() {
   const fetchData = async () => {
     try {
       setLoading(true);
+      console.log("Fetching absensi for:", { guruId: guru?.id, month: month + 1, year });
       const res = await getSesiAbsensi({
         guru_id: guru?.id,
         month: month + 1,
