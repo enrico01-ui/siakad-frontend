@@ -61,6 +61,7 @@ export default function AppRoutes() {
           <Route path="/guru" element={<GuruDashboard />} />
           <Route path="/guru/kelas" element={<Kelas />} />
           <Route path="/guru/rapor" element={<Rapor />} />
+          <Route path="/guru/pengumuman" element={<PengumumanAdmin />} />
           <Route path="/guru/riwayat-absensi" element={<RiwayatAbsensi />} />
         </Route>
 
