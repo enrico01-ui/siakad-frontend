@@ -58,11 +58,12 @@ export default function Sidebar({ role, onLogout }) {
     wali_kelas: [
       { label: "Dashboard", icon: House, path: "/guru" },
       { label: "Kelas Saya", icon: People, path: "/guru/kelas" },
-      { label: "Pengumuman", icon: FileEarmarkArrowUp, path: "/guru/pengumuman" }
+      { label: "Pengumuman", icon: FileEarmarkArrowUp, path: "/guru/pengumuman" },
+      { label: "Riwayat Absensi", icon: ClipboardCheck, path: "/guru/riwayat-absensi" }
     ],
     guru: [
       { label: "Dashboard", icon: House, path: "/guru" },
-      { label: "Kelas Saya", icon: People, path: "/guru/kelas" },
+      { label: "Riwayat Absensi", icon: ClipboardCheck, path: "/guru/riwayat-absensi" }
     ],
     siswa: [
       { label: "Dashboard", icon: House, path: "/siswa" },

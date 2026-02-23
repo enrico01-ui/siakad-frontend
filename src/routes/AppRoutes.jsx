@@ -20,7 +20,7 @@ import TagihanNonBulanan from "../pages/admin/TagihanNonBulanan.jsx";
 import GuruDashboard from "../pages/guru/Dashboard";
 import Kelas from "../pages/guru/Kelas";
 import Rapor from "../pages/guru/Rapor";
-
+import RiwayatAbsensi from "../pages/guru/RiwayatAbsensi";
 // SISWA
 import SiswaDashboard from "../pages/siswa/Dashboard";
 import RaporSaya from "../pages/siswa/RaporSiswa.jsx";
@@ -61,7 +61,7 @@ export default function AppRoutes() {
           <Route path="/guru" element={<GuruDashboard />} />
           <Route path="/guru/kelas" element={<Kelas />} />
           <Route path="/guru/rapor" element={<Rapor />} />
-          <Route path="/guru/pengumuman" element={<PengumumanAdmin />} />
+          <Route path="/guru/riwayat-absensi" element={<RiwayatAbsensi />} />
         </Route>
 
         {/* SISWA */}
