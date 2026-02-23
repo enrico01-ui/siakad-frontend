@@ -90,12 +90,12 @@ export default function DashboardGuru() {
 
   const formatDate = (dateStr) =>
     new Date(dateStr).toLocaleDateString("id-ID", {
-      day: "numeric", month: "short", year: "numeric"
+      day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Jakarta",
     });
 
   const formatJam = (dateStr) =>
     new Date(dateStr).toLocaleTimeString("id-ID", {
-      hour: "2-digit", minute: "2-digit"
+      hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta"
     });
 
   const getStatusBadge = (status) => {

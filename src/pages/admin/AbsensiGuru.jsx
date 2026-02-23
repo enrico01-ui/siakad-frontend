@@ -117,7 +117,8 @@ const formatTime = (time) => {
     return date.toLocaleTimeString("id-ID", { 
       hour: "2-digit", 
       minute: "2-digit",
-      hour12: false 
+      hour12: false ,
+      timeZone: "Asia/Jakarta",
     }).replace(".", ":"); // Memastikan format jam Indonesia menggunakan titik dua
   } catch (e) {
     return "-";

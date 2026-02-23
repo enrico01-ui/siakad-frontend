@@ -97,7 +97,7 @@ export default function RiwayatAbsensi() {
 };
 
   const formatJam = (dateStr) =>
-    dateStr ? new Date(dateStr).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "-";
+    dateStr ? new Date(dateStr).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta", }) : "-";
 
   const formatDurasi = (menit) => {
     if (!menit) return "-";
