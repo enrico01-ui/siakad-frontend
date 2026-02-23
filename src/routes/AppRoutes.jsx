@@ -57,7 +57,7 @@ export default function AppRoutes() {
         </Route>
 
         {/* GURU */}
-        <Route element={<RoleRoute allow={["guru","wali_kelas"]} />}>
+        <Route element={<RoleRoute allow={["guru","wali_kelas","coach","financial"]} />}>
           <Route path="/guru" element={<GuruDashboard />} />
           <Route path="/guru/kelas" element={<Kelas />} />
           <Route path="/guru/rapor" element={<Rapor />} />
