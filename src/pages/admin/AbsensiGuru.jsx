@@ -1048,7 +1048,7 @@ function TableLaporanBulanan({ data, month, year, semester, hariKerja, hariLibur
             // Persentase hadir = (hadir + terlambat) / hariKerja * 100
             // Terlambat dihitung hadir tapi diberi catatan
             const hariEfektif = rekap.totalHariKerja || hariKerja;
-            const totalMasuk = rekap.totalHadir + rekap.totalTerlambat;
+            const totalMasuk = rekap.totalHadir;
             const persentase = hariEfektif > 0 ? ((totalMasuk / hariEfektif) * 100).toFixed(1) : 0;
             const avgJam = rekap.totalHadir > 0 ? rekap.totalJamKerja / rekap.totalHadir : 0;
             console.log(`Guru: ${rekap.guru?.nama}, Hari Kerja: ${hariEfektif}, Hadir: ${rekap.totalHadir}, Terlambat: ${rekap.totalTerlambat}, % Hadir: ${persentase}%`);
