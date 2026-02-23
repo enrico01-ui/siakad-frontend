@@ -32,30 +32,39 @@ export default function DashboardGuru() {
 
       // ✅ Fetch absensi untuk semua role guru
       console.log("Fetching absensi for:", { guruId: guru?.id, month: new Date().getMonth() + 1, year: new Date().getFullYear() });
-      const absensiRes = await getSesiAbsensi({
-        guru_id: guru.id,
-        month: new Date().getMonth() + 1,
-        year: new Date().getFullYear(),
-      });
-      setAbsensiList(absensiRes.data || []);
+      const basePromises = [
+        getSesiAbsensi({
+          guru_id: guru.id,
+          month: new Date().getMonth() + 1,
+          year: new Date().getFullYear(),
+        }),
+      ];
 
       if (isWaliKelas) {
-        const kelasRes = await getGuruKelas();
+        const [absensiRes, kelasRes, raporRes, pengRes] = await Promise.all([
+          ...basePromises,
+          getGuruKelas(),
+          getRapor(),
+          getPengumumanGuru(),
+        ]);
+
+        setAbsensiList(absensiRes.data?.data || absensiRes.data || []);
+
         const kelas = kelasRes.data.kelas || [];
         setKelasList(kelas);
+        setRaporList(raporRes.data || []);
+        setPengumumanList(pengRes.data || []);
 
-        let allSiswa = [];
-        for (const k of kelas) {
-          const res = await getKelasSiswa(k.id);
-          allSiswa = [...allSiswa, ...(res.data.data || [])];
-        }
+        // ✅ Fetch semua siswa paralel juga
+        const siswaResponses = await Promise.all(
+          kelas.map(k => getKelasSiswa(k.id))
+        );
+        const allSiswa = siswaResponses.flatMap(r => r.data.data || []);
         setSiswaList(allSiswa);
 
-        const raporRes = await getRapor();
-        setRaporList(raporRes.data || []);
-
-        const pengRes = await getPengumumanGuru();
-        setPengumumanList(pengRes.data || []);
+      } else {
+        const [absensiRes] = await Promise.all(basePromises);
+        setAbsensiList(absensiRes.data?.data || absensiRes.data || []);
       }
     } catch (err) {
       console.error(err);
@@ -66,14 +75,15 @@ export default function DashboardGuru() {
 
   // ✅ Hitung statistik absensi
   const absensiStats = {
-    totalHadir: absensiList.filter(s => s.status === 'valid').length,
-    totalIzin: absensiList.filter(s => ['izin', 'izin_terlambat', 'cuti'].includes(s.status)).length,
-    totalInvalid: absensiList.filter(s => s.status === 'invalid').length,
-    totalJam: absensiList
-      .filter(s => s.status === "valid")
-      .reduce((sum, s) => sum + (parseFloat(s.total_jam) || 0), 0)
-      .toFixed(1),
-  };
+  totalHadir: absensiList.filter(s => ["valid", "terlambat"].includes(s.status)).length,
+  totalTerlambat: absensiList.filter(s => s.status === "terlambat").length,
+  totalIzin: absensiList.filter(s => ["izin", "cuti"].includes(s.status)).length,
+  totalInvalid: absensiList.filter(s => s.status === "invalid").length,
+  totalJam: absensiList
+    .filter(s => ["valid", "terlambat"].includes(s.status))
+    .reduce((sum, s) => sum + (parseFloat(s.total_jam) || 0), 0)
+    .toFixed(1),
+};
 
   // ✅ Ambil 5 riwayat terbaru
   const recentAbsensi = [...absensiList]
@@ -100,12 +110,13 @@ export default function DashboardGuru() {
 
   const getStatusBadge = (status) => {
     const map = {
-      valid: { bg: "success", label: "Hadir" },
-      belum_selesai: { bg: "warning", label: "Aktif" },
-      invalid: { bg: "danger", label: "Invalid" },
-      izin: { bg: "info", label: "Izin" },
-      izin_terlambat: { bg: "warning", label: "Terlambat" },
-      cuti: { bg: "secondary", label: "Cuti" },
+      valid:           { bg: "success",   label: "Hadir" },
+      terlambat:       { bg: "warning",   label: "Terlambat" }, // ✅ tambah
+      belum_selesai:   { bg: "warning",   label: "Aktif" },
+      invalid:         { bg: "danger",    label: "Invalid" },
+      izin:            { bg: "info",      label: "Izin" },
+      izin_terlambat:  { bg: "warning",   label: "Terlambat" },
+      cuti:            { bg: "secondary", label: "Cuti" },
     };
     const s = map[status] || { bg: "secondary", label: status };
     return <Badge bg={s.bg}>{s.label}</Badge>;
