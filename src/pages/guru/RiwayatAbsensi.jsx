@@ -60,38 +60,41 @@ export default function RiwayatAbsensi() {
   for (let d = 1; d <= daysInMonth; d++) calendarDays.push(d);
 
   const getStatusColor = (status) => {
-    switch (status) {
-      case "valid": return "#22c55e";
-      case "invalid": return "#ef4444";
-      case "izin": case "cuti": return "#3b82f6";
-      case "izin_terlambat": return "#f59e0b";
-      case "belum_selesai": return "#8b5cf6";
-      default: return null;
-    }
-  };
+  switch (status) {
+    case "valid":          return "#22c55e";
+    case "terlambat":      return "#f59e0b"; // ✅ tambah
+    case "invalid":        return "#ef4444";
+    case "izin":
+    case "cuti":           return "#3b82f6";
+    case "izin_terlambat": return "#f59e0b";
+    case "belum_selesai":  return "#8b5cf6";
+    default:               return null;
+  }
+};
 
-  const getStatusLabel = (status) => {
-    const map = {
-      valid: "Hadir",
-      invalid: "Alpha",
-      izin: "Izin",
-      cuti: "Cuti",
-      izin_terlambat: "Terlambat",
-      belum_selesai: "Belum Pulang",
-    };
-    return map[status] || status;
+ const getStatusLabel = (status) => {
+  const map = {
+    valid:           "Hadir",
+    terlambat:       "Terlambat", // ✅ tambah
+    invalid:         "Alpha",
+    izin:            "Izin",
+    cuti:            "Cuti",
+    izin_terlambat:  "Terlambat",
+    belum_selesai:   "Belum Pulang",
   };
+  return map[status] || status;
+};
 
   const stats = {
-    hadir: absensiList.filter(s => s.status === "valid").length,
-    izin: absensiList.filter(s => ["izin", "cuti"].includes(s.status)).length,
-    terlambat: absensiList.filter(s => s.status === "izin_terlambat").length,
-    alpha: absensiList.filter(s => s.status === "invalid").length,
-    totalJam: absensiList
-        .filter(s => s.status === "valid")
-        .reduce((sum, s) => sum + (parseFloat(s.total_jam) || 0), 0)
-        .toFixed(1),
-  };
+  hadir:     absensiList.filter(s => ["valid", "terlambat"].includes(s.status)).length,
+  terlambat: absensiList.filter(s => ["terlambat", "izin_terlambat"].includes(s.status)).length,
+  izin:      absensiList.filter(s => ["izin", "cuti"].includes(s.status)).length,
+  alpha:     absensiList.filter(s => s.status === "invalid").length,
+  totalJam:  absensiList
+    .filter(s => ["valid", "terlambat"].includes(s.status)) // ✅ hitung jam terlambat juga
+    .reduce((sum, s) => sum + (parseFloat(s.total_jam) || 0), 0)
+    .toFixed(1),
+};
 
   const formatJam = (dateStr) =>
     dateStr ? new Date(dateStr).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "-";
