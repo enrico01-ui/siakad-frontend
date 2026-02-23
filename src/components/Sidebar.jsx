@@ -65,6 +65,14 @@ export default function Sidebar({ role, onLogout }) {
       { label: "Dashboard", icon: House, path: "/guru" },
       { label: "Riwayat Absensi", icon: ClipboardCheck, path: "/guru/riwayat-absensi" }
     ],
+    coach: [
+      { label: "Dashboard", icon: House, path: "/guru" },
+      { label: "Riwayat Absensi", icon: ClipboardCheck, path: "/guru/riwayat-absensi" }
+    ],
+    financial: [
+      { label: "Dashboard", icon: House, path: "/guru" },
+      { label: "Riwayat Absensi", icon: ClipboardCheck, path: "/guru/riwayat-absensi" }
+    ],
     siswa: [
       { label: "Dashboard", icon: House, path: "/siswa" },
       { label: "Rapor", icon: FileEarmarkText, path: "/siswa/rapor" },
