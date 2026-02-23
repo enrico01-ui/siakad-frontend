@@ -60,41 +60,24 @@ const hitungHariKerja = (month, year, hariLibur = []) => {
   return count;
 };
 
-// =====================
-// STATUS HELPERS
-// =====================
-const BATAS_JAM = 7;
-const BATAS_MENIT = 31;
 
-const isTerlambat = (jamStr) => {
-  if (!jamStr) return false;
-  const [h, m] = jamStr.split(":").map(Number);
-  return h > BATAS_JAM || (h === BATAS_JAM && m > BATAS_MENIT);
-};
 
 /**
  * Derive status tampilan dari data sesi + absensi masuk
  * Returns: 'hadir' | 'terlambat' | 'sakit' | 'cuti' | 'tidak_hadir'
  */
 const deriveStatusTampilan = (sesi) => {
-  const status = sesi.status;
-
-  if (status === "izin_terlambat" || status === "izin terlambat") return "terlambat";
-  if (status === "cuti") return "cuti";
-  if (status === "izin") return "sakit";
-  if (status === "invalid") return "tidak_hadir";
-  if (status === "belum_selesai") return "belum_selesai";
-
-  if (status === "valid") {
-    // Cek apakah terlambat berdasarkan jam masuk
-    const absensiMasuk = sesi.absensi?.find((a) => a.status === "masuk");
-    console.log(`Sesi ${sesi.id} - Absensi Masuk:`, absensiMasuk);
-    if (absensiMasuk && isTerlambat(absensiMasuk.jam)) return "terlambat";
-    console.log(`Sesi ${sesi.id} - Status valid tanpa keterlambatan`);
-    return "hadir";
+  switch (sesi.status) {
+    case "valid":       return "hadir";
+    case "terlambat":   return "terlambat";  // ✅ status baru dari backend
+    case "izin_terlambat":
+    case "izin terlambat": return "terlambat";
+    case "izin":        return "sakit";
+    case "cuti":        return "cuti";
+    case "invalid":     return "tidak_hadir";
+    case "belum_selesai": return "belum_selesai";
+    default:            return "tidak_hadir";
   }
-
-  return "tidak_hadir";
 };
 
 const StatusBadge = ({ statusTampilan }) => {
@@ -424,10 +407,20 @@ export default function AbsensiGuru() {
   };
 
   const getSesiStatusBadge = (status) => {
-    const sesi = { belum_selesai: ["warning","Belum Selesai"], valid: ["success","Valid"], manual_close: ["info","Manual Close"], invalid: ["danger","Tidak Hadir"], izin: ["primary","Sakit/Izin"], cuti: ["secondary","Cuti"], izin_terlambat: ["warning","Izin Terlambat"], "izin terlambat": ["warning","Izin Terlambat"] };
-    const [bg, label] = sesi[status] || ["secondary", status || "-"];
-    return <Badge bg={bg}>{label}</Badge>;
+  const map = {
+    belum_selesai:   ["warning",   "Belum Selesai"],
+    valid:           ["success",   "Valid"],
+    terlambat:       ["warning",   "Terlambat"],      // ✅ tambah
+    manual_close:    ["info",      "Manual Close"],
+    invalid:         ["danger",    "Tidak Hadir"],
+    izin:            ["primary",   "Sakit/Izin"],
+    cuti:            ["secondary", "Cuti"],
+    izin_terlambat:  ["warning",   "Izin Terlambat"],
+    "izin terlambat":["warning",   "Izin Terlambat"],
   };
+  const [bg, label] = map[status] || ["secondary", status || "-"];
+  return <Badge bg={bg}>{label}</Badge>;
+};
 
   // Stats
   const filteredAbsensi = absensiData.filter(
@@ -448,12 +441,13 @@ export default function AbsensiGuru() {
   };
 
   const sesiStats = {
-    valid: sesiData.filter((s) => s.status === "valid").length,
-    belumSelesai: sesiData.filter((s) => s.status === "belum_selesai").length,
-    invalid: sesiData.filter((s) => s.status === "invalid").length,
-    izin: sesiData.filter((s) => ["izin", "izin_terlambat", "izin terlambat"].includes(s.status)).length,
-    cuti: sesiData.filter((s) => s.status === "cuti").length,
-  };
+  valid:       sesiData.filter(s => s.status === "valid").length,
+  terlambat:   sesiData.filter(s => s.status === "terlambat").length,  // ✅ tambah
+  belumSelesai: sesiData.filter(s => s.status === "belum_selesai").length,
+  invalid:     sesiData.filter(s => s.status === "invalid").length,
+  izin:        sesiData.filter(s => ["izin", "izin_terlambat", "izin terlambat"].includes(s.status)).length,
+  cuti:        sesiData.filter(s => s.status === "cuti").length,
+};
 
   const rekapStats = {
     totalGuru: rekapData.length,
@@ -508,6 +502,7 @@ export default function AbsensiGuru() {
         <Row className="g-3 mb-4 no-print">
           {[
             { label: "Valid (Hadir)", value: sesiStats.valid, color: "success", Icon: CheckCircle },
+            { label: "Terlambat", value: sesiStats.terlambat, color: "warning", Icon: Clock },
             { label: "Belum Selesai", value: sesiStats.belumSelesai, color: "warning", Icon: Clock },
             { label: "Tidak Hadir", value: sesiStats.invalid, color: "danger", Icon: XCircle },
             { label: "Sakit/Izin", value: sesiStats.izin, color: "primary", Icon: ClockHistory },
