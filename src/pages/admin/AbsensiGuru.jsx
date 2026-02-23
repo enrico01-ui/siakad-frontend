@@ -982,9 +982,9 @@ function TableSesi({ data, onViewDetail }) {
               <td>{new Date(sesi.jam_mulai).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</td>
               <td className="fw-medium">{sesi.guru?.nama || "-"}</td>
               <td>{sesi.guru?.nip || "-"}</td>
-              <td>{formatTime(sesi.jam_mulai)}</td>
-              <td>{formatTime(sesi.jam_selesai) || <span className="text-muted">Belum keluar</span>}</td>
-              <td>{formatDuration(sesi.durasi_menit)}</td>
+              <td>{sesi.jam_mulai}</td>
+              <td>{sesi.jam_selesai || <span className="text-muted">Belum keluar</span>}</td>
+              <td>{sesi.durasi_menit} menit</td>
               <td><Badge bg="secondary">{sesi.semester?.nama || "-"}</Badge></td>
               <td><StatusBadge statusTampilan={statusTampilan} /></td>
               <td>
