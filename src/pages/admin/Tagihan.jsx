@@ -225,7 +225,43 @@ export default function TuitionFee() {
     setSelectedSiswa(siswaData);
     setShowDetailModal(true);
   };
+  // ✅ NEW: Handle delete confirmation
+  const handleDeleteConfirm = (tagihanItem) => {
+    setSelectedTagihan(tagihanItem);
+    setShowDeleteModal(true);
+  };
 
+  // ✅ NEW: Handle delete tagihan
+  const handleDeleteTagihan = async () => {
+    if (!selectedTagihan) return;
+
+    try {
+      setProcessing(true);
+      const response = await deleteTagihan(selectedTagihan.id);
+      
+      if (response.success) {
+        alert("Tagihan berhasil dihapus!");
+        setShowDeleteModal(false);
+        setSelectedTagihan(null);
+        
+        // Close detail modal if open
+        if (showDetailModal) {
+          setShowDetailModal(false);
+          setSelectedSiswa(null);
+        }
+        
+        // Reload data
+        loadTagihan();
+      } else {
+        alert(response.message || "Gagal menghapus tagihan!");
+      }
+    } catch (error) {
+      console.error("Error deleting tagihan:", error);
+      alert(error.response?.data?.message || "Gagal menghapus tagihan!");
+    } finally {
+      setProcessing(false);
+    }
+  };
   const exportToExcel = () => {
     let csv = "No,Nama Siswa,NIS,Kelas,";
     csv += bulanDisplay.map(item => item.label).join(",");
@@ -651,6 +687,7 @@ export default function TuitionFee() {
                     <th className="text-end">Sisa</th>
                     <th>Batas Bayar</th>
                     <th className="text-center">Status</th>
+                    <th className="text-center">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -688,6 +725,18 @@ export default function TuitionFee() {
                             </Badge>
                           ) : <Badge bg="secondary">-</Badge>}
                         </td>
+                        <td className="text-center">
+                          {tagihan && tagihan.dibayar === 0 && (
+                            <Button
+                              size="sm"
+                              variant="outline-danger"
+                              onClick={() => handleDeleteConfirm(tagihan)}
+                              title="Hapus Tagihan"
+                            >
+                              <Trash size={14} />
+                            </Button>
+                          )}
+                        </td>
                       </tr>
                     );
                   })}
@@ -710,6 +759,57 @@ export default function TuitionFee() {
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowDetailModal(false)}>
             Tutup
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Konfirmasi Hapus Tagihan</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedTagihan && (
+            <>
+              <Alert variant="warning">
+                <strong>Perhatian!</strong> Anda akan menghapus tagihan berikut:
+              </Alert>
+              <div className="mb-3">
+                <p className="mb-1"><strong>Bulan:</strong> {NAMA_BULAN[selectedTagihan.bulan]} {selectedTagihan.tahun}</p>
+                <p className="mb-1"><strong>Nominal:</strong> {formatRupiah(selectedTagihan.nominal)}</p>
+                <p className="mb-1"><strong>Status:</strong> {selectedTagihan.status}</p>
+              </div>
+              <p className="text-danger mb-0">
+                <strong>Apakah Anda yakin ingin menghapus tagihan ini?</strong>
+              </p>
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button 
+            variant="secondary" 
+            onClick={() => {
+              setShowDeleteModal(false);
+              setSelectedTagihan(null);
+            }}
+            disabled={processing}
+          >
+            Batal
+          </Button>
+          <Button 
+            variant="danger" 
+            onClick={handleDeleteTagihan}
+            disabled={processing}
+          >
+            {processing ? (
+              <>
+                <Spinner size="sm" className="me-2" />
+                Menghapus...
+              </>
+            ) : (
+              <>
+                <Trash size={16} className="me-2" />
+                Hapus Tagihan
+              </>
+            )}
           </Button>
         </Modal.Footer>
       </Modal>
