@@ -730,7 +730,7 @@ export default function TuitionFee() {
                           ) : <Badge bg="secondary">-</Badge>}
                         </td>
                         <td className="text-center">
-                          {tagihan && tagihan.dibayar === 0 && (
+                          {tagihan && tagihan.dibayar === "0.00" && (
                             <Button
                               size="sm"
                               variant="outline-danger"
