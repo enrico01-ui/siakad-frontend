@@ -697,7 +697,7 @@ export default function TuitionFee() {
                   {bulanDisplay.map(item => {
                     const tagihan = selectedSiswa.tagihan[item.key];
                     const overdue = tagihan && isOverdue(tagihan.batas_bayar) && tagihan.status !== 'LUNAS';
-                    
+                    console.log(`Tagihan for ${item.label}:`, tagihan);
                     return (
                       <tr key={item.key}>
                         <td>{item.label}</td>
