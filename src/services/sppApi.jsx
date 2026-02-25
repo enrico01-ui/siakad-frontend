@@ -6,7 +6,7 @@ export const createTagihanBulk = (data) => api.post("/tagihan-spp/bulk", data);
 export const verifySpp = (id) =>
   api.post(`/pembayaran-spp/${id}/verify`);
 export const getSppDetail = (id) => api.get(`/pembayaran-spp/${id}`);
-export const rejectSpp = (id, reason) => api.post(`/pembayaran-spp/${id}/reject`, { reason });
+export const rejectSpp = (id, catatan) => api.post(`/pembayaran-spp/${id}/reject`, { catatan });
 export const bulkCreateTagihan = (data) => api.post("/tagihan/bulk", data);
 export const getTagihanSpp = (params) => api.get("/tagihan-spp", { params });
 export const getTagihanSppSiswa = (siswaId, semesterId) => 
