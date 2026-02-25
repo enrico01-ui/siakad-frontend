@@ -21,6 +21,7 @@ export default function TuitionFee() {
   //tahun sebelumnya
   const [selectedTahun, setSelectedTahun] = useState((new Date().getFullYear() - 1).toString()); // aku pingn tahun sebelumnya
   const [searchTerm, setSearchTerm] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showSetNominalModal, setShowSetNominalModal] = useState(false);
   const [selectedSiswa, setSelectedSiswa] = useState(null);
