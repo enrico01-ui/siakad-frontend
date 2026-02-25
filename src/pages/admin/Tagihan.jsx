@@ -6,6 +6,7 @@ import {
 import { 
   Search, Download, FileEarmarkExcel, Eye,
   CashStack, Calendar, People, CheckCircle, Plus
+  , Trash
 } from "react-bootstrap-icons";
 import { getTagihanSpp as getTagihan, createTagihanSpp as createTagihan, bulkCreateTagihan, deleteTagihanSpp as deletTagihan } from "../../services/sppApi";
 import { getKelas } from "../../services/kelasApi";
