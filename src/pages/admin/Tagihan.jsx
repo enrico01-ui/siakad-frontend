@@ -8,7 +8,7 @@ import {
   CashStack, Calendar, People, CheckCircle, Plus
   , Trash
 } from "react-bootstrap-icons";
-import { getTagihanSpp as getTagihan, createTagihanSpp as createTagihan, bulkCreateTagihan, deleteTagihanSpp as deletTagihan } from "../../services/sppApi";
+import { getTagihanSpp as getTagihan, createTagihanSpp as createTagihan, bulkCreateTagihan, deleteTagihanSpp as deleteTagihan } from "../../services/sppApi";
 import { getKelas } from "../../services/kelasApi";
 import { getSiswa } from "../../services/siswaApi";
 import SearchableSiswaSelect from "../../components/searchableSiswaSelect";
