@@ -25,6 +25,7 @@ export default function TuitionFee() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showSetNominalModal, setShowSetNominalModal] = useState(false);
   const [selectedSiswa, setSelectedSiswa] = useState(null);
+  const [selectedTagihan, setSelectedTagihan] = useState(null);
   const [processing, setProcessing] = useState(false);
 
   const [nominalForm, setNominalForm] = useState({
