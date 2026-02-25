@@ -85,10 +85,22 @@ export default function VerifikasiPembayaran() {
 
     try {
       setProcessing(true);
-      await rejectSpp(id, rejectReason);
-      alert("❌ Pembayaran ditolak!\nNotifikasi telah dikirim ke siswa.");
-      setShowDetailModal(false);
-      await loadPembayaran();
+      console.log('📤 Sending reject request:', {
+        id,
+        catatan: rejectReason.trim()
+      });
+      const response = await rejectSpp(id, rejectReason.trim());
+      console.log('✅ Reject response:', response);
+      if (response.data && response.data.success) {
+        alert("✅ Pembayaran berhasil ditolak!\nNotifikasi telah dikirim ke siswa.");
+        setShowDetailModal(false);
+        setRejectReason(""); // Clear reason
+        await loadPembayaran();
+      } else {
+        // Handle unsuccessful response
+        const errorMessage = response.data?.message || 'Gagal menolak pembayaran';
+        alert(`❌ ${errorMessage}`);
+      }
     } catch (error) {
       console.error("Error rejecting payment:", error);
       alert("❌ Gagal menolak pembayaran!");
