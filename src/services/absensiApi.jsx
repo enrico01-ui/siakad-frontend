@@ -8,9 +8,9 @@ export const getAbsensiById = (guruId) => api.get(`/absensi-guru/${guruId}`);
 export const generateLaporanPDF = (sesiId) => api.get(`/sesi-absensi/${sesiId}/laporan-pdf`, {
   responseType: 'blob'
 });
-export const generateLaporanBulanan = (bulan, tahun, semesterId) =>
+export const generateLaporanBulanan = (bulan, tahun, semesterId, totalHari) =>
     api.get("/laporan/absensi-bulanan", {
-        params: { bulan, tahun, semester_id: semesterId },
+        params: { bulan, tahun, semester_id: semesterId, total_hari: totalHari },
         responseType: "blob", // ✅ penting untuk PDF
     });
 // Sesi Absensi

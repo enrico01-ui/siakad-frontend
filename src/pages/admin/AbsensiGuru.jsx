@@ -382,7 +382,8 @@ export default function AbsensiGuru() {
         const response = await generateLaporanBulanan(
             selectedMonth,
             selectedYear,
-            filterSemester !== "all" ? filterSemester : null
+            filterSemester !== "all" ? filterSemester : null,
+            hariKerja
         );
         const blob = new Blob([response.data], { type: "application/pdf" });
         const url = window.URL.createObjectURL(blob);
