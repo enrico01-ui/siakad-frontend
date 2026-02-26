@@ -102,6 +102,7 @@ export default function DashboardAdmin() {
   const getStatusBadgeVariant = (status) => {
     switch(status?.toLowerCase()) {
       case 'valid': return 'success';
+      case 'terlambat': return 'warning';
       case 'izin': return 'warning';
       case 'izin_terlambat': return 'info';
       case 'invalid': return 'danger';
@@ -113,6 +114,7 @@ export default function DashboardAdmin() {
   const getStatusLabel = (status) => {
     switch(status?.toLowerCase()) {
       case 'valid': return 'HADIR';
+      case 'terlambat': return 'TERLAMBAT';
       case 'izin': return 'IZIN';
       case 'izin_terlambat': return 'IZIN TERLAMBAT';
       case 'invalid': return 'TIDAK VALID';
