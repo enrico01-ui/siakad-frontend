@@ -81,7 +81,7 @@ export default function DashboardAdmin() {
       value: stats.totalPembayaran >= 1000000 
         ? `Rp ${(stats.totalPembayaran / 1000000).toFixed(1)}jt`
         : `Rp ${(stats.totalPembayaran / 1000).toFixed(0)}rb`,
-      subtitle: `Total ${pembayaranRecent.length} transaksi`,
+      subtitle: `Total hasil verifikasi transaksi`,
       trend: "up",
       icon: CashStack, 
       color: "#f97316",
