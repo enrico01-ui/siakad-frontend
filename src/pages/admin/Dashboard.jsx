@@ -406,9 +406,6 @@ export default function DashboardAdmin() {
                     <div className="d-flex justify-content-between align-items-center">
                       <div>
                         <strong className="text-success">Total Pembayaran Bulan Ini</strong>
-                        <p className="mb-0 small text-muted">
-                          Dari {pembayaranRecent.length} transaksi yang terverifikasi
-                        </p>
                       </div>
                       <div className="text-end">
                         <span className="text-success fs-4 fw-bold">
