@@ -4,28 +4,11 @@ import { People, PersonBadge, CashStack, ClipboardCheck, GraphUp } from "react-b
 import { TrendingUp, TrendingDown } from "lucide-react";
 
 // Import API services
-import { getSiswa } from "../../services/siswaApi";
-import { getGuru } from "../../services/guruApi";
-import { getSpp } from "../../services/sppApi";
-import { getSesiAbsensi } from "../../services/absensiApi";
-import { getKelas } from "../../services/kelasApi";
-import { getSemester } from "../../services/semesterApi";
+import { getDashboardStats } from "../../services/dashboardApi";
 
 export default function DashboardAdmin() {
   const [loading, setLoading] = useState(true);
-  const [semesterAktif, setSemesterAktif] = useState(null);
-  
-  // Stats data
-  const [totalSiswa, setTotalSiswa] = useState(0);
-  const [totalGuru, setTotalGuru] = useState(0);
-  const [totalPembayaran, setTotalPembayaran] = useState(0);
-  const [persentaseKehadiran, setPersentaseKehadiran] = useState(0);
-  
-  // Detail data
-  const [pembayaranRecent, setPembayaranRecent] = useState([]);
-  const [absensiGuru, setAbsensiGuru] = useState([]);
-  const [statistikKelas, setStatistikKelas] = useState([]);
-  const [kehadiranStats, setKehadiranStats] = useState({ hadir: 0, izin: 0, invalid: 0, total: 0 });
+  const [dashboardData, setDashboardData] = useState(null);
 
   useEffect(() => {
     loadDashboardData();
@@ -34,190 +17,87 @@ export default function DashboardAdmin() {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-
-      // Load semester aktif
-      const semesterResponse = await getSemester();
-      const aktif = semesterResponse.data.find(s => s.is_aktif);
-      setSemesterAktif(aktif);
-
-      // Load semua data paralel
-      const [siswaRes, guruRes, sppRes, sesiRes, kelasRes] = await Promise.all([
-        getSiswa(),
-        getGuru(),
-        getSpp(),
-        getSesiAbsensi(),
-        getKelas()
-      ]);
-
-      console.log('📊 Data Sesi Absensi:', sesiRes);
-
-      // Process Siswa - filter yang AKTIF
-      const siswaAktif = (siswaRes.data || []).filter(s => s.status === 'AKTIF');
-      setTotalSiswa(siswaAktif.length);
-
-      // Process Guru
-      const allGuru = guruRes.data || [];
-      setTotalGuru(allGuru.length);
-
-      // Process SPP - hitung total pembayaran bulan ini yang VERIFIED
-      const today = new Date();
-      const currentMonth = today.getMonth() + 1; // JavaScript month is 0-indexed
-      const currentYear = today.getFullYear();
       
-      console.log("📅 Current Month:", currentMonth, "Year:", currentYear);
-      console.log("💰 Data SPP yang diterima:", sppRes.data);
-
-      const sppBulanIni = (sppRes.data.data || []).filter(spp => {
-        return (
-          spp.status === 'DITERIMA' &&
-          parseInt(spp.bulan) === currentMonth &&
-          parseInt(spp.tahun) === currentYear
-        );
-      });
+      // ✅ Single API call - all data pre-processed
+      const response = await getDashboardStats();
       
-      console.log("✅ SPP bulan ini (DITERIMA):", sppBulanIni);
+      if (response.success) {
+        setDashboardData(response.data);
+      }
       
-      const totalSpp = sppBulanIni.reduce((sum, spp) => sum + (parseFloat(spp.jumlah) || 0), 0);
-      setTotalPembayaran(totalSpp);
-
-      // Get recent pembayaran (5 terbaru berdasarkan tanggal_verifkasi)
-      const recentSpp = (sppRes.data.data || [])
-        .filter(spp => spp.tanggal_verifikasi) // Hanya yang sudah diverifikasi
-        .sort((a, b) => new Date(b.tanggal_verifikasi) - new Date(a.tanggal_verifikasi))
-        .slice(0, 5)
-        .map(spp => ({
-          id: spp.id,
-          nama: spp.siswa?.nama || '-',
-          kelas: spp.siswa?.kelas?.nama_kelas || '-',
-          bulan: getBulanNama(spp.bulan),
-          tahun: spp.tahun,
-          jumlah: spp.jumlah || 0,
-          status: spp.status,
-          tanggal: new Date(spp.tanggal_verifikasi).toLocaleDateString('id-ID', { 
-            day: 'numeric', 
-            month: 'short', 
-            year: 'numeric' 
-          })
-        }));
-      setPembayaranRecent(recentSpp);
-
-      console.log("💵 Total Pembayaran SPP bulan ini:", totalSpp);
-      console.log("📋 Pembayaran SPP terbaru:", recentSpp);
-
-      // ✅ Process Sesi Absensi Guru - hari ini
-      const todayStr = today.toISOString().split('T')[0];
-      
-      console.log("📅 Looking for sesi on date:", todayStr);
-      console.log("📊 All Sesi Data:", sesiRes.data);
-
-      // Filter sesi hari ini berdasarkan jam_mulai
-      const sesiHariIni = (sesiRes.data  || []).filter(sesi => {
-        const sesiDate = new Date(sesi.jam_mulai).toISOString().split('T')[0];
-        const isToday = sesiDate === todayStr;
-        
-        console.log(`🔍 Sesi ID ${sesi.id}:`, {
-          jam_mulai: sesi.jam_mulai,
-          sesiDate,
-          isToday,
-          status: sesi.status,
-          guru: sesi.guru?.nama
-        });
-        
-        return isToday;
-      });
-
-      console.log("✅ Sesi hari ini:", sesiHariIni);
-
-      // Group by guru (ambil sesi terbaru per guru)
-      const guruSesiMap = new Map();
-      sesiHariIni.forEach(sesi => {
-        const guruId = sesi.guru_id;
-        if (!guruSesiMap.has(guruId) || 
-            new Date(sesi.jam_mulai) > new Date(guruSesiMap.get(guruId).jam_mulai)) {
-          guruSesiMap.set(guruId, sesi);
-        }
-      });
-
-      console.log("👥 Guru Sesi Map:", guruSesiMap);
-
-      // Convert to array untuk display
-      const absensiList = Array.from(guruSesiMap.values()).map(sesi => {
-        return {
-          id: sesi.id,
-          nama: sesi.guru?.nama || '-',
-          peran: sesi.guru?.peran || 'Guru',
-          status: sesi.status, // valid | izin | invalid | izin_terlambat | belum_selesai
-          waktu: sesi.jam_mulai ? new Date(sesi.jam_mulai).toLocaleTimeString('id-ID', { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-          }) : '-',
-          jam_selesai: sesi.jam_selesai ? new Date(sesi.jam_selesai).toLocaleTimeString('id-ID', { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-          }) : '-',
-          durasi: sesi.total_jam ? `${sesi.total_jam} jam` : '-'
-        };
-      });
-
-      console.log("📋 Absensi List untuk display:", absensiList);
-
-      setAbsensiGuru(absensiList.slice(0, 10)); // Ambil 10 teratas
-
-      // Hitung statistik kehadiran
-      const hadir = absensiList.filter(a => a.status === 'valid').length;
-      const izin = absensiList.filter(a => a.status === 'izin' || a.status === 'izin_terlambat').length;
-      const invalid = absensiList.filter(a => a.status === 'invalid').length;
-      const totalAbsen = absensiList.length;
-      
-      // Persentase dari total guru yang sudah absen
-      const persentase = totalAbsen > 0 ? ((hadir / totalAbsen) * 100).toFixed(1) : 0;
-      
-      setPersentaseKehadiran(persentase);
-      setKehadiranStats({ 
-        hadir, 
-        izin, 
-        invalid, 
-        total: totalAbsen,
-        totalGuru: allGuru.length 
-      });
-
-      console.log("📊 Kehadiran Stats:", { hadir, izin, invalid, totalAbsen, persentase });
-
-      // Process Statistik Kelas
-      const kelasData = kelasRes.data || [];
-      const kelasStats = kelasData.reduce((acc, kelas) => {
-        const nama_kelas = kelas.nama_kelas.split('-')[0].trim(); // Ambil bagian sebelum '-'
-        if (!acc[nama_kelas]) {
-          acc[nama_kelas] = {
-            tingkat: `Kelas ${nama_kelas}`,
-            jumlah: 0,
-            rombel: 0
-          };
-        }
-        acc[nama_kelas].jumlah += kelas.siswa?.length || 0;
-        acc[nama_kelas].rombel += 1;
-        return acc;
-      }, {});
-
-      const finalKelasStats = Object.values(kelasStats);
-      console.log("📊 Statistik Kelas:", finalKelasStats);
-      
-      setStatistikKelas(finalKelasStats);
-
     } catch (error) {
-      console.error("❌ Error loading dashboard data:", error);
+      console.error("Error loading dashboard:", error);
+      // Show error toast/notification
     } finally {
       setLoading(false);
     }
   };
 
-  const getBulanNama = (bulan) => {
-    const namaBulan = [
-      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-    ];
-    return namaBulan[parseInt(bulan) - 1] || bulan;
-  };
+  if (loading) {
+    return (
+      <Container fluid className="p-4 text-center" style={{ minHeight: "100vh" }}>
+        <Spinner animation="border" variant="primary" className="mt-5" />
+        <p className="mt-3">Memuat data dashboard...</p>
+      </Container>
+    );
+  }
+
+  if (!dashboardData) {
+    return (
+      <Container fluid className="p-4">
+        <div className="alert alert-danger">
+          Gagal memuat data dashboard. Silakan refresh halaman.
+        </div>
+      </Container>
+    );
+  }
+
+  const { stats, kehadiranStats, pembayaranRecent, absensiGuru, statistikKelas, semesterAktif } = dashboardData;
+
+  const statsCards = [
+    { 
+      id: 1,
+      title: "Total Siswa", 
+      value: stats.totalSiswa.toLocaleString('id-ID'),
+      subtitle: "Siswa Aktif",
+      trend: "up",
+      icon: People, 
+      color: "#3b82f6",
+      bgColor: "#eff6ff"
+    },
+    { 
+      id: 2,
+      title: "Total Guru", 
+      value: stats.totalGuru.toLocaleString('id-ID'),
+      subtitle: "Tenaga Pengajar",
+      trend: "up",
+      icon: PersonBadge, 
+      color: "#10b981",
+      bgColor: "#f0fdf4"
+    },
+    { 
+      id: 3,
+      title: "Pembayaran Bulan Ini", 
+      value: stats.totalPembayaran >= 1000000 
+        ? `Rp ${(stats.totalPembayaran / 1000000).toFixed(1)}jt`
+        : `Rp ${(stats.totalPembayaran / 1000).toFixed(0)}rb`,
+      subtitle: `Total ${pembayaranRecent.length} transaksi`,
+      trend: "up",
+      icon: CashStack, 
+      color: "#f97316",
+      bgColor: "#fff7ed"
+    },
+    { 
+      id: 4,
+      title: "Kehadiran Hari Ini", 
+      value: `${stats.persentaseKehadiran}%`,
+      subtitle: `${kehadiranStats.hadir} dari ${kehadiranStats.total} guru`,
+      trend: stats.persentaseKehadiran >= 80 ? "up" : "down",
+      icon: ClipboardCheck, 
+      color: "#8b5cf6",
+      bgColor: "#f5f3ff"
+    }
+  ];
 
   const getStatusBadgeVariant = (status) => {
     switch(status?.toLowerCase()) {
@@ -240,60 +120,6 @@ export default function DashboardAdmin() {
       default: return status?.toUpperCase() || '-';
     }
   };
-
-  const statsCards = [
-    { 
-      id: 1,
-      title: "Total Siswa", 
-      value: totalSiswa.toLocaleString('id-ID'),
-      subtitle: "Siswa Aktif",
-      trend: "up",
-      icon: People, 
-      color: "#3b82f6",
-      bgColor: "#eff6ff"
-    },
-    { 
-      id: 2,
-      title: "Total Guru", 
-      value: totalGuru.toLocaleString('id-ID'),
-      subtitle: "Tenaga Pengajar",
-      trend: "up",
-      icon: PersonBadge, 
-      color: "#10b981",
-      bgColor: "#f0fdf4"
-    },
-    { 
-      id: 3,
-      title: "Pembayaran Bulan Ini", 
-      value: totalPembayaran >= 1000000 
-        ? `Rp ${(totalPembayaran / 1000000).toFixed(1)}jt`
-        : `Rp ${(totalPembayaran / 1000).toFixed(0)}rb`,
-      subtitle: `Total ${pembayaranRecent.length} transaksi`,
-      trend: "up",
-      icon: CashStack, 
-      color: "#f97316",
-      bgColor: "#fff7ed"
-    },
-    { 
-      id: 4,
-      title: "Kehadiran Hari Ini", 
-      value: `${persentaseKehadiran}%`,
-      subtitle: `${kehadiranStats.hadir} dari ${kehadiranStats.total} guru`,
-      trend: persentaseKehadiran >= 80 ? "up" : "down",
-      icon: ClipboardCheck, 
-      color: "#8b5cf6",
-      bgColor: "#f5f3ff"
-    }
-  ];
-
-  if (loading) {
-    return (
-      <Container fluid className="p-4 text-center" style={{ minHeight: "100vh" }}>
-        <Spinner animation="border" variant="primary" className="mt-5" />
-        <p className="mt-3">Memuat data dashboard...</p>
-      </Container>
-    );
-  }
 
   return (
     <Container fluid className="p-4" style={{ backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
