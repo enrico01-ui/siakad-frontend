@@ -4,7 +4,7 @@ import { People, PersonBadge, CashStack, ClipboardCheck, GraphUp } from "react-b
 import { TrendingUp, TrendingDown } from "lucide-react";
 
 // Import API services
-import { getDashboardStats } from "../../services/dashboardApi";
+import { getDashboardStats } from "../../services/userApi";
 
 export default function DashboardAdmin() {
   const [loading, setLoading] = useState(true);
