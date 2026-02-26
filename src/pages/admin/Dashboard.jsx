@@ -328,16 +328,16 @@ export default function DashboardAdmin() {
                     <div className="d-flex justify-content-between align-items-center">
                       <div>
                         <strong className="text-primary">
-                          Tingkat Kehadiran: {persentaseKehadiran}%
+                          Tingkat Kehadiran: {stats.persentaseKehadiran}%
                         </strong>
                         <p className="mb-0 small text-muted">
                           {kehadiranStats.total} dari {kehadiranStats.totalGuru} guru sudah absen
                         </p>
                       </div>
                       <ProgressBar 
-                        now={persentaseKehadiran} 
+                        now={stats.persentaseKehadiran} 
                         style={{ width: "150px", height: "10px" }}
-                        variant={persentaseKehadiran >= 80 ? "success" : "warning"}
+                        variant={stats.persentaseKehadiran >= 80 ? "success" : "warning"}
                       />
                     </div>
                   </div>
