@@ -200,7 +200,7 @@ export default function DashboardAdmin() {
                         <span className="text-primary fw-bold">{kelas.jumlah} siswa</span>
                       </div>
                       <ProgressBar 
-                        now={(kelas.jumlah / totalSiswa) * 100} 
+                        now={(kelas.jumlah / stats.totalSiswa) * 100} 
                         style={{ height: "8px" }}
                       />
                       <small className="text-muted mt-1 d-block">
@@ -213,7 +213,7 @@ export default function DashboardAdmin() {
                     <Card.Body>
                       <div className="text-center">
                         <h2 className="fw-bold text-primary mb-0">
-                          {totalSiswa.toLocaleString('id-ID')}
+                          {stats.totalSiswa.toLocaleString('id-ID')}
                         </h2>
                         <p className="text-muted mb-0">Total Siswa Aktif</p>
                       </div>
