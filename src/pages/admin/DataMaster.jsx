@@ -484,14 +484,14 @@ function FormSiswa({ formData, onChange, dataKelas }) {
           <Form.Label>Status <span className="text-danger">*</span></Form.Label>
           <Form.Select
             name="status"
-            value={formData.status || "aktif"}
+            value={formData.status || "AKTIF"}
             onChange={onChange}
             required
           >
-            <option value="aktif">Aktif</option>
-            <option value="lulus">Lulus</option>
-            <option value="pindah">Pindah</option>
-            <option value="keluar">Keluar</option>
+            <option value="AKTIF">Aktif</option>
+            <option value="LULUS">Lulus</option>
+            <option value="PINDAH">Pindah</option>
+            <option value="KELUAR">Keluar</option>
           </Form.Select>
         </Form.Group>
       </Col>
