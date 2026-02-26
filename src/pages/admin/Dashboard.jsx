@@ -412,7 +412,7 @@ export default function DashboardAdmin() {
                       </div>
                       <div className="text-end">
                         <span className="text-success fs-4 fw-bold">
-                          Rp {totalPembayaran.toLocaleString('id-ID')}
+                          Rp {stats.totalPembayaran.toLocaleString('id-ID')}
                         </span>
                       </div>
                     </div>
