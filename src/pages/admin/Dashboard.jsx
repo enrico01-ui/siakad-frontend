@@ -91,7 +91,7 @@ export default function DashboardAdmin() {
       id: 4,
       title: "Kehadiran Hari Ini", 
       value: `${stats.persentaseKehadiran}%`,
-      subtitle: `${kehadiranStats.hadir} dari ${kehadiranStats.total} guru`,
+      subtitle: `${kehadiranStats.hadir} dari ${kehadiranStats.totalGuru} guru`,
       trend: stats.persentaseKehadiran >= 80 ? "up" : "down",
       icon: ClipboardCheck, 
       color: "#8b5cf6",
