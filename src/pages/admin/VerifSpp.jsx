@@ -430,7 +430,13 @@ function DetailPembayaranModal({
   if (!payment) return null;
 
   const isPending = payment.status === 'PENDING';
-  const tagihanItems = payment.tagihan_items_array || [];
+  const tagihanItems = payment.tagihan?.map(t => ({
+    tagihan_id: t.id,
+    jenis_tagihan: t.jenis_tagihan,
+    nominal: t.pivot.nominal_dibayar,
+    bulan: t.bulan,
+    tahun: t.tahun,
+  })) || [];
 
   return (
     <>
