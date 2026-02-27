@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { 
   Container, Card, Table, Badge, Button, Modal, 
   Form, Row, Col, Alert, Spinner, InputGroup, Tabs, Tab
@@ -39,55 +39,134 @@ export default function Kelas() {
   });
 
   useEffect(() => {
-    loadData();
-    loadSemester();
+    const loadAllData = async () => {
+      try {
+        setLoading(true);
+        
+        // ✅ STEP 1: Load semester first (needed for dropdown)
+        const semesterResponse = await getSemesterList();
+        setSemesterList(semesterResponse.data || []);
+        
+        // ✅ STEP 2: Load kelas data in parallel
+        let allSiswa = [];
+        let kelasData = [];
+        
+        if (guru && guru.kelas && guru.kelas.length > 0) {
+          // ✅ Parallel API calls for all kelas
+          const kelasPromises = guru.kelas.map(kelas => 
+            getKelasSiswa(kelas.id)
+          );
+          
+          // ✅ Wait for all to complete
+          const kelasResponses = await Promise.all(kelasPromises);
+          
+          // ✅ Process responses
+          kelasResponses.forEach((response, index) => {
+            const siswaKelas = response.data.data || [];
+            allSiswa = [...allSiswa, ...siswaKelas];
+            kelasData.push({
+              id: guru.kelas[index].id,
+              nama: guru.kelas[index].nama_kelas,
+              jumlahSiswa: siswaKelas.length
+            });
+          });
+        }
+        
+        setSiswaList(allSiswa);
+        setKelasList(kelasData);
+        
+        // ✅ STEP 3: Load rapor if wali kelas (parallel with kelas)
+        if (isWaliKelas) {
+          const raporResponse = await getRapor();
+          setRaporList(raporResponse.data || []);
+        }
+        
+      } catch (error) {
+        console.error("Error loading data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadAllData();
   }, []);
-   const loadSemester = async () => {
-    try {
-      const response = await getSemesterList();
-      setSemesterList(response.data || []);
-      console.log("Semester list:", response.data);
-    } catch (error) {
-      console.error("Error loading semester:", error);
-    }
-  };
-  const loadData = async () => {
+  const filteredSiswa = useMemo(() => {
+    return siswaList.filter(siswa => {
+      const matchSearch = 
+        siswa.nama?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        siswa.nis?.includes(searchTerm);
+      
+      const matchKelas = selectedKelas === "all" || 
+                         siswa.kelas_id === parseInt(selectedKelas);
+      
+      return matchSearch && matchKelas;
+    });
+  }, [siswaList, searchTerm, selectedKelas]);
+
+  // ✅ OPTIMIZED: Memoize filtered rapor
+  const filteredRapor = useMemo(() => {
+    return raporList.filter(rapor => {
+      const siswa = rapor.siswa || {};
+      return siswa.nama?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+             siswa.nis?.includes(searchTerm);
+    });
+  }, [raporList, searchTerm]);
+
+  // ✅ OPTIMIZED: Memoize stats
+  const stats = useMemo(() => ({
+    totalSiswa: siswaList.length,
+    totalKelas: kelasList.length,
+    totalRapor: raporList.length
+  }), [siswaList.length, kelasList.length, raporList.length]);
+
+  // ✅ OPTIMIZED: Callback for getSiswaRapor
+  const getSiswaRapor = useCallback((siswaId) => {
+    return raporList.filter(rapor => rapor.siswa_id === siswaId);
+  }, [raporList]);
+
+  // ✅ OPTIMIZED: Reload function (also parallel)
+  const reloadData = useCallback(async () => {
     try {
       setLoading(true);
+      
       let allSiswa = [];
       let kelasData = [];
 
-      if (guru && guru.kelas) {
-        for (const kelas of guru.kelas) {
-          const response = await getKelasSiswa(kelas.id);
+      if (guru && guru.kelas && guru.kelas.length > 0) {
+        // ✅ Parallel reload
+        const kelasPromises = guru.kelas.map(kelas => 
+          getKelasSiswa(kelas.id)
+        );
+        
+        const kelasResponses = await Promise.all(kelasPromises);
+        
+        kelasResponses.forEach((response, index) => {
           const siswaKelas = response.data.data || [];
-          console.log("All Siswa:", siswaKelas);
           allSiswa = [...allSiswa, ...siswaKelas];
           kelasData.push({
-            id: kelas.id,
-            nama: kelas.nama_kelas,
+            id: guru.kelas[index].id,
+            nama: guru.kelas[index].nama_kelas,
             jumlahSiswa: siswaKelas.length
           });
-        }
+        });
       }
       
       setSiswaList(allSiswa);
       setKelasList(kelasData);
-      console.log("Siswa:", allSiswa);
-      console.log("Kelas:", kelasData);
-      // Load rapor if wali kelas
+      
       if (isWaliKelas) {
         const raporResponse = await getRapor();
         setRaporList(raporResponse.data || []);
-        console.log("Rapor:", raporResponse.data);
+
       }
+      
     } catch (error) {
-      console.error("Error loading data:", error);
+      console.error("Error reloading data:", error);
     } finally {
       setLoading(false);
     }
-  };
-
+  }, [guru, isWaliKelas]);
+  
   const handleOpenUploadModal = (siswa) => {
     setSelectedSiswa(siswa);
     setUploadForm({
@@ -143,7 +222,7 @@ export default function Kelas() {
       
       alert("Rapor berhasil diupload!");
       setShowUploadModal(false);
-      loadData();
+      reloadData();
     } catch (error) {
       console.error("Error uploading rapor:", error);
       alert("Gagal upload rapor: " + (error.response?.data?.message || error.message));
@@ -159,7 +238,7 @@ export default function Kelas() {
       await deleteRapor(raporId);
       console.log("Rapor deleted:", raporId);
       alert("Rapor berhasil dihapus!");
-      loadData();
+      reloadData();
     } catch (error) {
       console.error("Error deleting rapor:", error);
       alert("Gagal menghapus rapor!");
@@ -171,41 +250,17 @@ export default function Kelas() {
     setShowDetailModal(true);
   };
 
-  const filteredSiswa = siswaList.filter(siswa => {
-    const matchSearch = 
-      siswa.nama?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      siswa.nis?.includes(searchTerm);
-    
-    const matchKelas = selectedKelas === "all" || siswa.kelas_id === parseInt(selectedKelas);
-    
-    return matchSearch && matchKelas;
-  });
-
-  const filteredRapor = raporList.filter(rapor => {
-    const siswa = rapor.siswa || {};
-    return siswa.nama?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           siswa.nis?.includes(searchTerm);
-  });
-
-  const getSiswaRapor = (siswaId) => {
-    return raporList.filter(rapor => rapor.siswa_id === siswaId);
-  };
-
-  const stats = {
-    totalSiswa: siswaList.length,
-    totalKelas: kelasList.length,
-    totalRapor: raporList.length
-  };
-  const handleSemesterChange = (e) => {
+  
+  const handleSemesterChange = useCallback((e) => {
     const semesterNama = e.target.value;
     const selectedSem = semesterList.find(s => s.nama === semesterNama);
     
-    setUploadForm({
-      ...uploadForm,
+    setUploadForm(prev => ({
+      ...prev,
       semester: semesterNama,
       tahun_ajaran: selectedSem ? selectedSem.tahun_ajaran : ""
-    });
-  };
+    }));
+  }, [semesterList]);
 
   return (
     <Container fluid className="p-4" style={{ backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
@@ -540,7 +595,7 @@ export default function Kelas() {
 }
 
 // Table Components
-function TableSiswa({ data, isWaliKelas, onUpload, onViewDetail, getSiswaRapor }) {
+const TableSiswa = React.memo(function TableSiswa({ data, isWaliKelas, onUpload, onViewDetail, getSiswaRapor }) {
   return (
     <div style={{ overflowX: 'auto' }}>
       <Table hover responsive>
@@ -626,9 +681,9 @@ function TableSiswa({ data, isWaliKelas, onUpload, onViewDetail, getSiswaRapor }
       </Table>
     </div>
   );
-}
+});
 
-function TableRapor({ data, onDelete }) {
+const TableRapor = React.memo(function TableRapor({ data, onDelete }) {
   return (
     <div style={{ overflowX: 'auto' }}>
       <Table hover responsive>
@@ -712,4 +767,4 @@ function TableRapor({ data, onDelete }) {
       </Table>
     </div>
   );
-}
+});
