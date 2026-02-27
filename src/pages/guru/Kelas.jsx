@@ -1,4 +1,5 @@
-import { useEffect, useState, useMemo, useCallback, React } from "react";
+import { useEffect, useState, useMemo, useCallback, memo} from "react";
+
 import { 
   Container, Card, Table, Badge, Button, Modal, 
   Form, Row, Col, Alert, Spinner, InputGroup, Tabs, Tab
@@ -595,7 +596,7 @@ export default function Kelas() {
 }
 
 // Table Components
-const TableSiswa = React.memo(function TableSiswa({ data, isWaliKelas, onUpload, onViewDetail, getSiswaRapor }) {
+const TableSiswa = memo(function TableSiswa({ data, isWaliKelas, onUpload, onViewDetail, getSiswaRapor }) {
   return (
     <div style={{ overflowX: 'auto' }}>
       <Table hover responsive>
@@ -683,7 +684,7 @@ const TableSiswa = React.memo(function TableSiswa({ data, isWaliKelas, onUpload,
   );
 });
 
-const TableRapor = React.memo(function TableRapor({ data, onDelete }) {
+const TableRapor = memo(function TableRapor({ data, onDelete }) {
   return (
     <div style={{ overflowX: 'auto' }}>
       <Table hover responsive>
