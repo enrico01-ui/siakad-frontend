@@ -168,7 +168,7 @@ export default function Kelas() {
     }
   }, [guru, isWaliKelas]);
   
-  const handleOpenUploadModal = (siswa) => {
+  const handleOpenUploadModal = useCallback((siswa) => {
     setSelectedSiswa(siswa);
     setUploadForm({
       siswa_id: siswa.id,
@@ -177,9 +177,9 @@ export default function Kelas() {
       file: null
     });
     setShowUploadModal(true);
-  };
+  }, []);
 
-  const handleFileChange = (e) => {
+  const handleFileChange = useCallback((e) => {
     const file = e.target.files[0];
     if (file) {
       // Validate file type
@@ -200,7 +200,7 @@ export default function Kelas() {
 
       setUploadForm({ ...uploadForm, file });
     }
-  };
+  }, []);
 
   const handleUploadRapor = async (e) => {
     e.preventDefault();
@@ -246,10 +246,10 @@ export default function Kelas() {
     }
   };
 
-  const handleViewDetail = (siswa) => {
+  const handleViewDetail = useCallback((siswa) => {
     setSelectedSiswa(siswa);
     setShowDetailModal(true);
-  };
+  }, []);
 
   
   const handleSemesterChange = useCallback((e) => {
