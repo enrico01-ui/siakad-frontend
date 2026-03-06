@@ -79,7 +79,13 @@ function SignInForm() {
     <div className="form-container sign-in-container">
         
       <div>
-        <div style={{ textAlign: "left", display: "flex", gap: "10px", alignItems: "center", marginBottom: "13%" }}>
+        <div style={{
+            textAlign: "left",
+            display: "flex",
+            gap: "10px",
+            alignItems: "center",
+            marginBottom: "13%",
+          }}>
         <img
             src="https://hagiosschooloflife.sch.id/img/navbar/logo-hsol.webp"
             alt="Hagios School of Life"

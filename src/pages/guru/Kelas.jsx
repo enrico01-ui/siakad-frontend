@@ -198,7 +198,7 @@ export default function Kelas() {
         return;
       }
 
-      setUploadForm({ ...uploadForm, file });
+      setUploadForm((prev) => ({ ...prev, file }));
     }
   }, []);
 
