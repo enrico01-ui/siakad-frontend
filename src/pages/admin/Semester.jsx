@@ -15,6 +15,7 @@ export default function SemesterManagement() {
   const [modalMode, setModalMode] = useState("add");
   const [selectedItem, setSelectedItem] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
   const [formData, setFormData] = useState({
     nama: "",
     tahun_ajaran: "",
