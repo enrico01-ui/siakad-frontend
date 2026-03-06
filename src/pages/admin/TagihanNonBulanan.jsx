@@ -828,6 +828,10 @@ function DetailTagihanModal({ show, onHide, tagihan, formatRupiah, currentLabel,
                   <td className="fw-medium">: {tagihan.periode || '-'}</td>
                 </tr>
                 <tr>
+                  <td className="text-muted">Bulan</td>
+                  <td className="fw-medium">: {tagihan.bulan}</td>
+                </tr>
+                <tr>
                   <td className="text-muted">Tahun</td>
                   <td className="fw-medium">: {tagihan.tahun}</td>
                 </tr>
