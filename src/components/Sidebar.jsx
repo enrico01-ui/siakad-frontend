@@ -1,5 +1,6 @@
 import { Nav, Dropdown, Collapse } from "react-bootstrap";
 import './sidebar.css';
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   House,
@@ -31,7 +32,17 @@ export default function Sidebar({ role, onLogout }) {
   });
   
   const user = JSON.parse(localStorage.getItem("user"));
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+const [mobileOpen, setMobileOpen] = useState(false);
 
+useEffect(() => {
+  const handleResize = () => {
+    setIsMobile(window.innerWidth < 768);
+  };
+
+  window.addEventListener("resize", handleResize);
+  return () => window.removeEventListener("resize", handleResize);
+}, []);
   const menuItems = {
     admin: [
       { label: "Dashboard", icon: House, path: "/admin" },
@@ -125,16 +136,19 @@ export default function Sidebar({ role, onLogout }) {
   };
 
   return (
-    <div 
+    <>
+    <div
       className="d-flex flex-column"
       style={{
-        width: isCollapsed ? "80px" : "250px",
+        width: isMobile ? "250px" : isCollapsed ? "80px" : "250px",
         height: "100vh",
         backgroundColor: "rgba(20, 51, 97, 1)",
         position: "fixed",
+        left: isMobile ? (mobileOpen ? "0" : "-260px") : "0",
+        top: 0,
         color: "#fff",
-        transition: "width 0.3s ease",
-        zIndex: 1000
+        transition: "all 0.3s ease",
+        zIndex: 2000
       }}
     >
       {/* Header */}
@@ -160,8 +174,14 @@ export default function Sidebar({ role, onLogout }) {
         <List 
           size={20} 
           style={{ cursor: "pointer" }} 
-          onClick={handleToggleSidebar}
-          title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          onClick={() => {
+            if (isMobile) {
+              setMobileOpen(!mobileOpen);
+            } else {
+              handleToggleSidebar();
+            }
+          }}
+          title={isMobile ? "Menu" : isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         />
       </div>
 
@@ -377,5 +397,20 @@ export default function Sidebar({ role, onLogout }) {
         </Nav.Link>
       </div>
     </div>
+    {isMobile && mobileOpen && (
+      <div
+        onClick={() => setMobileOpen(false)}
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundColor: "rgba(0,0,0,0.4)",
+          zIndex: 1500
+        }}
+      />
+    )}
+    </>
   );
 }
