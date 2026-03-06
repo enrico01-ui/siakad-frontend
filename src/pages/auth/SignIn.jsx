@@ -5,12 +5,11 @@ import ReCAPTCHA from "react-google-recaptcha";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
-
-
-
 function SignInForm() {
   const navigate = useNavigate();
   const [captchaToken, setCaptchaToken] = React.useState(null);
+  const recaptchaRef = React.useRef(null);
+
   const handleCaptchaChange = (token) => {
     setCaptchaToken(token);
   };
@@ -18,13 +17,14 @@ function SignInForm() {
   const [state, setState] = React.useState({
     username: "",
     password: "",
-    captcha_token: ""
+    captcha_token: "",
   });
-  const handleChange = evt => {
+
+  const handleChange = (evt) => {
     const value = evt.target.value;
     setState({
       ...state,
-      [evt.target.name]: value
+      [evt.target.name]: value,
     });
   };
 
@@ -35,16 +35,20 @@ function SignInForm() {
       toast.error("Silakan verifikasi captcha terlebih dahulu");
       return;
     }
-    if(!state.username || !state.password){
+    if (!state.username || !state.password) {
       toast.error("Username dan password wajib diisi");
       return;
     }
     try {
       const { username, password } = state;
 
-      const res = await login({ username, password, captcha_token: captchaToken });
+      const res = await login({
+        username,
+        password,
+        captcha_token: captchaToken,
+      });
       console.log(res);
-      if(res.data.message === "Login gagal") {
+      if (res.data.message === "Login gagal") {
         throw new Error(res.data.message || "Login gagal");
       }
       // simpan token & user
@@ -54,78 +58,96 @@ function SignInForm() {
       toast.success("Login berhasil");
       const role = res.data.user.role?.nama;
       console.log(role);
+
       // redirect sesuai role
       setTimeout(() => {
         if (role === "admin") {
           navigate("/admin");
-        } else if (role === "guru" || role === "wali_kelas" || role === "coach" || role === "financial") {
+        } else if (
+          role === "guru" ||
+          role === "wali_kelas" ||
+          role === "coach" ||
+          role === "financial"
+        ) {
           navigate("/guru");
         } else if (role === "siswa") {
           navigate("/siswa");
-        } 
-          else {
+        } else {
           navigate("/");
         }
       }, 800);
 
       setState({ username: "", password: "" });
-
     } catch (err) {
       toast.error(err?.message || "Login gagal");
+      // Reset captcha on error
+      if (recaptchaRef.current) {
+        recaptchaRef.current.reset();
+      }
+      setCaptchaToken(null);
     }
   };
 
   return (
     <div className="form-container sign-in-container">
-        
       <div>
-        <div style={{
+        <div
+          style={{
             textAlign: "left",
             display: "flex",
             gap: "10px",
             alignItems: "center",
             marginBottom: "13%",
-          }}>
-        <img
+          }}
+        >
+          <img
             src="https://hagiosschooloflife.sch.id/img/navbar/logo-hsol.webp"
             alt="Hagios School of Life"
-            style={{ width: "80px", marginBottom: "10px", marginLeft: "4%", marginTop: "10px" }}
-        />
-        <div>
-            <strong style={{ margin: 0, color: "grey" }}>Sistem Informasi Akademik</strong>
-        <p style={{ margin: 0, fontSize: "14px", color: "grey" }}>
-            Hagios School of Life
-        </p>
+            style={{
+              width: "80px",
+              marginBottom: "10px",
+              marginLeft: "4%",
+              marginTop: "10px",
+            }}
+          />
+          <div>
+            <strong style={{ margin: 0, color: "grey" }}>
+              Sistem Informasi Akademik
+            </strong>
+            <p style={{ margin: 0, fontSize: "14px", color: "grey" }}>
+              Hagios School of Life
+            </p>
+          </div>
         </div>
-        </div>
-  
-      <form onSubmit={handleOnSubmit}>
-        <h1>Sign in</h1>
-        
-        <span>use your account</span>
-        <input
-          type="text"
-          placeholder="username"
-          name="username"
-          value={state.username}
-          onChange={handleChange}
-          autoComplete="username"
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={state.password}
-          onChange={handleChange}
-          autoComplete="current-password"
-        />
-        <ReCAPTCHA
-          sitekey="6LfuUXMsAAAAAMm9qHQqbchYj0-ELQ-izWUkQJoX"
-          onChange={handleCaptchaChange}
-        />
 
-        <button style={{marginTop: "4%"}}>Sign In</button>
-      </form>
+        <form onSubmit={handleOnSubmit}>
+          <h1>Sign in</h1>
+
+          <span>use your account</span>
+          <input
+            type="text"
+            placeholder="username"
+            name="username"
+            value={state.username}
+            onChange={handleChange}
+            autoComplete="username"
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={state.password}
+            onChange={handleChange}
+            autoComplete="current-password"
+          />
+          <ReCAPTCHA
+            ref={recaptchaRef}
+            sitekey="6LfuUXMsAAAAAMm9qHQqbchYj0-ELQ-izWUkQJoX"
+            onChange={handleCaptchaChange}
+          />
+
+          <button style={{ marginTop: "4%" }}>Sign In</button>
+        </form>
       </div>
     </div>
   );
