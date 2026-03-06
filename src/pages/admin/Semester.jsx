@@ -119,14 +119,85 @@ export default function SemesterManagement() {
     item.nama?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.tahun_ajaran?.includes(searchTerm)
   );
+  const MobileCard = ({ semester }) => (
+    <Card className="mb-3 shadow-sm">
+      <Card.Body>
+        <div className="d-flex justify-content-between align-items-start mb-2">
+          <div>
+            <h5 className="mb-1">{semester.nama}</h5>
+            <small className="text-muted">{semester.tahun_ajaran}</small>
+          </div>
+          {semester.is_aktif && (
+            <Badge bg="success" pill>
+              <CheckCircle size={12} className="me-1" />
+              Aktif
+            </Badge>
+          )}
+        </div>
 
+        <div className="mb-3">
+          <div className="d-flex align-items-center mb-2">
+            <Calendar size={14} className="me-2 text-muted" />
+            <small>
+              <strong>Mulai:</strong> {semester.tanggal_mulai 
+                ? new Date(semester.tanggal_mulai).toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
+                  })
+                : '-'
+              }
+            </small>
+          </div>
+          <div className="d-flex align-items-center">
+            <Calendar size={14} className="me-2 text-muted" />
+            <small>
+              <strong>Selesai:</strong> {semester.tanggal_selesai 
+                ? new Date(semester.tanggal_selesai).toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
+                  })
+                : '-'
+              }
+            </small>
+          </div>
+        </div>
+
+        <div className="d-flex gap-2">
+          {!semester.is_aktif && (
+            <Button
+              size="sm"
+              variant="outline-success"
+              onClick={() => handleSetAktif(semester.id)}
+              disabled={loading}
+              className="flex-fill"
+            >
+              <CheckCircle size={14} className="me-1" />
+              Aktifkan
+            </Button>
+          )}
+          <Button
+            size="sm"
+            variant="outline-primary"
+            onClick={() => handleEdit(semester)}
+            disabled={loading}
+            className="flex-fill"
+          >
+            <Pencil size={14} className="me-1" />
+            Edit
+          </Button>
+        </div>
+      </Card.Body>
+    </Card>
+  );
   return (
-    <Container fluid className="p-4" style={{ backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
-      <h2 className="mb-4 fw-bold">Manajemen Semester</h2>
+    <Container fluid className="p-4  p-md-4" style={{ backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
+      <h2 className="mb-4 mb-md-4 fw-bold">Manajemen Semester</h2>
 
       <Card className="border-0 shadow-sm">
-        <Card.Body>
-          <Row className="mb-3">
+        <Card.Body className="p-3 p-md-4">
+          <Row className="mb-3 g-2">
             <Col md={6}>
               <InputGroup>
                 <InputGroup.Text>
@@ -139,7 +210,7 @@ export default function SemesterManagement() {
                 />
               </InputGroup>
             </Col>
-            <Col md={6} className="text-end">
+            <Col xs={12} md={6} className="d-grid d-md-block text-md-end" >
               <Button variant="primary" onClick={handleAdd} disabled={loading}>
                 <Plus size={20} className="me-2" />
                 Tambah Semester
@@ -161,97 +232,114 @@ export default function SemesterManagement() {
                 </Alert>
               )}
 
-              <Table hover responsive>
-                <thead className="table-light">
-                  <tr>
-                    <th>Nama Semester</th>
-                    <th>Tahun Ajaran</th>
-                    <th>Tanggal Mulai</th>
-                    <th>Tanggal Selesai</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
+              {!isMobile ? (
+                <div className="table-responsive">
+                  <Table hover>
+                    <thead className="table-light">
+                      <tr>
+                        <th>Nama Semester</th>
+                        <th>Tahun Ajaran</th>
+                        <th>Tanggal Mulai</th>
+                        <th>Tanggal Selesai</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filtered.length > 0 ? (
+                        filtered.map((semester) => (
+                          <tr key={semester.id} className={semester.is_aktif ? 'table-active' : ''}>
+                            <td className="fw-medium">
+                              {semester.nama}
+                              {semester.is_aktif && (
+                                <Badge bg="success" className="ms-2" pill>
+                                  <CheckCircle size={12} className="me-1" />
+                                  Aktif
+                                </Badge>
+                              )}
+                            </td>
+                            <td>{semester.tahun_ajaran}</td>
+                            <td>
+                              <Calendar size={14} className="me-1 text-muted" />
+                              {semester.tanggal_mulai 
+                                ? new Date(semester.tanggal_mulai).toLocaleDateString('id-ID', {
+                                    day: 'numeric',
+                                    month: 'short',
+                                    year: 'numeric'
+                                  })
+                                : '-'
+                              }
+                            </td>
+                            <td>
+                              <Calendar size={14} className="me-1 text-muted" />
+                              {semester.tanggal_selesai 
+                                ? new Date(semester.tanggal_selesai).toLocaleDateString('id-ID', {
+                                    day: 'numeric',
+                                    month: 'short',
+                                    year: 'numeric'
+                                  })
+                                : '-'
+                              }
+                            </td>
+                            <td>
+                              {semester.is_aktif ? (
+                                <Badge bg="success">
+                                  <CheckCircle size={14} className="me-1" />
+                                  Aktif
+                                </Badge>
+                              ) : (
+                                <Badge bg="secondary">Tidak Aktif</Badge>
+                              )}
+                            </td>
+                            <td>
+                              <div className="d-flex gap-2">
+                                {!semester.is_aktif && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline-success"
+                                    onClick={() => handleSetAktif(semester.id)}
+                                    disabled={loading}
+                                  >
+                                    <CheckCircle size={14} className="me-1" />
+                                    Aktifkan
+                                  </Button>
+                                )}
+                                <Button
+                                  size="sm"
+                                  variant="outline-primary"
+                                  onClick={() => handleEdit(semester)}
+                                  disabled={loading}
+                                >
+                                  <Pencil size={14} />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="6" className="text-center text-muted py-4">
+                            {searchTerm ? 'Tidak ada hasil pencarian' : 'Belum ada data semester'}
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </Table>
+                </div>
+              ) : (
+                /* Mobile Card View */
+                <div>
                   {filtered.length > 0 ? (
                     filtered.map((semester) => (
-                      <tr key={semester.id} className={semester.is_aktif ? 'table-active' : ''}>
-                        <td className="fw-medium">
-                          {semester.nama}
-                          {semester.is_aktif ? (
-                            <Badge bg="success" className="ms-2" pill>
-                              <CheckCircle size={12} className="me-1" />
-                              Aktif
-                            </Badge>
-                          ) : ""}
-                        </td>
-                        <td>{semester.tahun_ajaran}</td>
-                        <td>
-                          <Calendar size={14} className="me-1 text-muted" />
-                          {semester.tanggal_mulai 
-                            ? new Date(semester.tanggal_mulai).toLocaleDateString('id-ID', {
-                                day: 'numeric',
-                                month: 'short',
-                                year: 'numeric'
-                              })
-                            : '-'
-                          }
-                        </td>
-                        <td>
-                          <Calendar size={14} className="me-1 text-muted" />
-                          {semester.tanggal_selesai 
-                            ? new Date(semester.tanggal_selesai).toLocaleDateString('id-ID', {
-                                day: 'numeric',
-                                month: 'short',
-                                year: 'numeric'
-                              })
-                            : '-'
-                          }
-                        </td>
-                        <td>
-                          {semester.is_aktif ? (
-                            <Badge bg="success" className="d-flex align-items-center gap-1" style={{ width: 'fit-content' }}>
-                              <CheckCircle size={14} />
-                              Aktif
-                            </Badge>
-                          ) : (
-                            <Badge bg="secondary">Tidak Aktif</Badge>
-                          )}
-                        </td>
-                        <td>
-                          <div className="d-flex gap-2">
-                            {!semester.is_aktif && (
-                              <Button
-                                size="sm"
-                                variant="outline-success"
-                                onClick={() => handleSetAktif(semester.id)}
-                                disabled={loading}
-                              >
-                                <CheckCircle size={14} className="me-1" />
-                                Aktifkan
-                              </Button>
-                            )}
-                            <Button
-                              size="sm"
-                              variant="outline-primary"
-                              onClick={() => handleEdit(semester)}
-                              disabled={loading}
-                            >
-                              <Pencil size={14} />
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
+                      <MobileCard key={semester.id} semester={semester} />
                     ))
                   ) : (
-                    <tr>
-                      <td colSpan="6" className="text-center text-muted py-4">
-                        {searchTerm ? 'Tidak ada hasil pencarian' : 'Belum ada data semester'}
-                      </td>
-                    </tr>
+                    <Alert variant="secondary" className="text-center">
+                      {searchTerm ? 'Tidak ada hasil pencarian' : 'Belum ada data semester'}
+                    </Alert>
                   )}
-                </tbody>
-              </Table>
+                </div>
+              )}
             </>
           )}
         </Card.Body>
@@ -298,7 +386,7 @@ export default function SemesterManagement() {
             </Form.Group>
 
             <Row>
-              <Col md={6}>
+              <Col xs={12} md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label>Tanggal Mulai <span className="text-danger">*</span></Form.Label>
                   <Form.Control
@@ -310,7 +398,7 @@ export default function SemesterManagement() {
                   />
                 </Form.Group>
               </Col>
-              <Col md={6}>
+              <Col xs={12} md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label>Tanggal Selesai <span className="text-danger">*</span></Form.Label>
                   <Form.Control

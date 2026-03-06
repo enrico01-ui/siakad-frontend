@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./styles.css";
 import SignInForm from "./pages/auth/SignIn";
 import InfoPanel from "./pages/auth/SignUp";
+import './AdminResponsive.css';
 
 export default function App() {
   const [type, setType] = useState("signIn");
