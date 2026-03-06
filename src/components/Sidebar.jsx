@@ -19,7 +19,7 @@ import {
 import { useState } from "react";
 import { icons } from "lucide-react";
 
-export default function Sidebar({ role, onLogout }) {
+export default function Sidebar({ role, onLogout, isCollapsed, setIsCollapsed }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [activeMenu, setActiveMenu] = useState("Dashboard");
@@ -113,8 +113,6 @@ useEffect(() => {
 
   const handleToggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
-    localStorage.setItem("sidebarCollapsed", JSON.stringify(!isCollapsed));
-    console.log(`Sidebar ${!isCollapsed ? 'collapsed' : 'expanded'}`);
   };
 
   const getUserData = () => {
