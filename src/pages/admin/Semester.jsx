@@ -253,12 +253,12 @@ export default function SemesterManagement() {
                           <tr key={semester.id} className={semester.is_aktif ? 'table-active' : ''}>
                             <td className="fw-medium">
                               {semester.nama}
-                              {semester.is_aktif && (
+                              {semester.is_aktif ? (
                                 <Badge bg="success" className="ms-2" pill>
                                   <CheckCircle size={12} className="me-1" />
                                   Aktif
                                 </Badge>
-                              )}
+                              ) : null}
                             </td>
                             <td>{semester.tahun_ajaran}</td>
                             <td>
