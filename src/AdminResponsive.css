@@ -202,3 +202,38 @@ body {
 .d-flex.flex-column::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
 }
+/* Prevent body scroll when mobile menu is open */
+body.mobile-menu-open {
+  overflow: hidden;
+}
+
+/* Smooth scrollbar for sidebar */
+.d-flex.flex-column::-webkit-scrollbar {
+  width: 6px;
+}
+
+.d-flex.flex-column::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.d-flex.flex-column::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.d-flex.flex-column::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Ensure content doesn't overflow */
+@media screen and (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
+  
+  /* Mobile content full width */
+  .container-fluid {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+}

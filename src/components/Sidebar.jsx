@@ -1,6 +1,6 @@
 import { Nav, Dropdown, Collapse } from "react-bootstrap";
 import './sidebar.css';
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   House,
@@ -105,300 +105,332 @@ export default function Sidebar({
   };
 
   const handleToggleSidebar = () => {
-    if (isMobile) {
-      setMobileOpen(!mobileOpen);
-    } else {
-      setIsCollapsed(!isCollapsed);
-    }
+    setIsCollapsed(!isCollapsed);
   };
 
   const isSubmenuActive = (submenu) => {
     return submenu.some(item => location.pathname === item.path);
   };
 
-  // Calculate sidebar position and width
+  // Sidebar positioning and sizing
   const getSidebarStyle = () => {
     if (isMobile) {
+      // Mobile: Fixed overlay, slide in from left
       return {
-        width: "250px",
-        left: mobileOpen ? "0" : "-260px",
+        width: "280px",
+        maxWidth: "85vw",
+        left: mobileOpen ? "0" : "-100%",
+        transition: "left 0.3s ease"
+      };
+    } else {
+      // Desktop: Fixed sidebar that can collapse
+      return {
+        width: isCollapsed ? "80px" : "250px",
+        left: "0",
+        transition: "width 0.3s ease"
       };
     }
-    return {
-      width: isCollapsed ? "80px" : "250px",
-      left: 0,
-    };
   };
 
   const sidebarStyle = getSidebarStyle();
 
   return (
-    <>
-      <div
-        className="d-flex flex-column"
+    <div
+      style={{
+        ...sidebarStyle,
+        height: "100vh",
+        backgroundColor: "rgba(20, 51, 97, 1)",
+        position: "fixed",
+        top: 0,
+        color: "#fff",
+        zIndex: 2000,
+        overflowY: "auto",
+        overflowX: "hidden",
+        display: "flex",
+        flexDirection: "column"
+      }}
+    >
+      {/* Header */}
+      <div 
+        className="border-bottom border-white border-opacity-10"
         style={{
-          ...sidebarStyle,
-          height: "100vh",
-          backgroundColor: "rgba(20, 51, 97, 1)",
-          position: "fixed",
-          top: 0,
-          color: "#fff",
-          transition: "all 0.3s ease",
-          zIndex: 2000,
-          overflowY: "auto",
-          overflowX: "hidden"
+          padding: "16px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: isCollapsed && !isMobile ? "center" : "space-between"
         }}
       >
-        {/* Header */}
-        <div className={`d-flex align-items-center justify-content-${isCollapsed && !isMobile ? "center" : "between"} p-3 border-bottom border-white border-opacity-10`}>
-          {(!isCollapsed || isMobile) && (
-            <div className="d-flex align-items-center gap-2">
-              <div 
-                className="d-flex align-items-center justify-content-center fw-bold"
-                style={{
-                  width: "35px",
-                  height: "35px",
-                  backgroundColor: "#fff",
-                  color: "rgba(37, 150, 190, 1)",
-                  borderRadius: "8px",
-                  fontSize: "14px"
-                }}
-              >
-                HS
-              </div>
-              <span className="fw-bold">SIAKAD</span>
-            </div>
-          )}
-          
-          {isMobile ? (
-            <X 
-              size={24} 
-              style={{ cursor: "pointer" }} 
-              onClick={() => setMobileOpen(false)}
-              title="Tutup menu"
-            />
-          ) : (
-            <List 
-              size={20} 
-              style={{ cursor: "pointer" }} 
-              onClick={handleToggleSidebar}
-              title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            />
-          )}
-        </div>
-
-        {/* User Section with Dropdown */}
         {(!isCollapsed || isMobile) && (
-          <Dropdown className="border-bottom border-white border-opacity-10"> 
-            <Dropdown.Toggle
-              variant="link"
-              className="user-dropdown-toggle text-white text-decoration-none w-100 d-flex align-items-center gap-2 p-3"
-              style={{ 
-                backgroundColor: "transparent",
-                border: "none",
-                boxShadow: "none",
-              }}
-            >
-              <div 
-                className="d-flex align-items-center justify-content-center fw-bold"
-                style={{
-                  width: "40px",
-                  height: "40px",
-                  backgroundColor: "rgba(255,255,255,0.2)",
-                  borderRadius: "8px"
-                }}
-              >
-                <User size={24} />
-              </div>
-              <div className="flex-grow-1 text-start">
-                <div className="fw-medium" style={{ fontSize: "14px" }}>
-                  {user.guru != null ? user.guru.nama : "Admin"}
-                </div>
-                <div style={{ fontSize: "12px", opacity: 0.7 }}>
-                  {user.role?.nama}
-                </div>
-              </div>
-            </Dropdown.Toggle>
-
-            <Dropdown.Menu
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <div 
               style={{
-                backgroundColor: "rgb(28, 62, 112)",
-                padding: "1px",
-                width: "100%",
+                width: "35px",
+                height: "35px",
+                backgroundColor: "#fff",
+                color: "rgba(37, 150, 190, 1)",
                 borderRadius: "8px",
+                fontSize: "14px",
+                fontWeight: "bold",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
               }}
             >
-              <Dropdown.Item
-                className="user-dropdownmenu-toggle"
-                href="#"
-                onClick={() => handleMenuClick("/profil")}
-                style={{
-                  color: "white",
-                  fontSize: "13px",
-                  padding: "10px",
-                  lineHeight: "16px",
-                  display: "flex",
-                  alignItems: "center",
-                  borderRadius: "6px",
-                }}
-              >
-                <Person size={14} className="me-2" />
-                Lihat Profil
-              </Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
-        )}
-
-        {/* Logo */}
-        {(!isCollapsed || isMobile) && (
-          <div className="text-center py-3">
-            <img 
-              src="https://hagiosschooloflife.sch.id/img/navbar/logo-hsol.webp" 
-              alt="Logo HSOL" 
-              style={{ width: "120px" }}
-            />
+              HS
+            </div>
+            <span style={{ fontWeight: "bold", fontSize: "16px" }}>SIAKAD</span>
           </div>
         )}
-
-        {/* Menu Items */}
-        <Nav className="flex-column flex-grow-1 px-3" style={{marginBottom: "0", paddingBottom: "0"}}>
-          {currentMenuItems.map((item, index) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.path;
-            const hasSubmenu = item.hasSubmenu;
-            const isSubmenuOpen = openSubmenu[item.label.toLowerCase()];
-            const isAnySubmenuActive = hasSubmenu && isSubmenuActive(item.submenu);
-
-            return (
-              <div key={index}>
-                {/* Main Menu Item */}
-                <Nav.Link
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (hasSubmenu) {
-                      handleToggleSubmenu(item.label);
-                    } else {
-                      handleMenuClick(item.path);
-                    }
-                  }}
-                  className="text-white d-flex align-items-center gap-2 mb-1 position-relative"
-                  style={{
-                    backgroundColor: (isActive || isAnySubmenuActive) ? "#ff9800" : "transparent",
-                    borderRadius: "12px",
-                    padding: "10px 15px",
-                    fontSize: "14px",
-                    fontWeight: (isActive || isAnySubmenuActive) ? "500" : "400",
-                    transition: "all 0.3s ease"
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive && !isAnySubmenuActive) {
-                      e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive && !isAnySubmenuActive) {
-                      e.currentTarget.style.backgroundColor = "transparent";
-                    }
-                  }}
-                  title={isCollapsed && !isMobile ? item.label : ""}
-                >
-                  <Icon size={18} />
-                  {(!isCollapsed || isMobile) && (
-                    <>
-                      <span className="flex-grow-1">{item.label}</span>
-                      {hasSubmenu && (
-                        isSubmenuOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />
-                      )}
-                    </>
-                  )}
-                  {(isActive || isAnySubmenuActive) && (
-                    <div 
-                      style={{
-                        position: "absolute",
-                        left: 0,
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        width: "4px",
-                        height: "70%",
-                        backgroundColor: "#fff",
-                        borderRadius: "0 4px 4px 0"
-                      }}
-                    />
-                  )}
-                </Nav.Link>
-
-                {/* Submenu Items */}
-                {hasSubmenu && (!isCollapsed || isMobile) && (
-                  <Collapse in={isSubmenuOpen}>
-                    <div>
-                      {item.submenu.map((subItem, subIndex) => {
-                        const isSubActive = location.pathname === subItem.path;
-                        return (
-                          <Nav.Link
-                            key={subIndex}
-                            href="#"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              handleMenuClick(subItem.path);
-                            }}
-                            className="text-white d-flex align-items-center gap-2 mb-1"
-                            style={{
-                              backgroundColor: isSubActive ? "rgba(255,152,0,0.3)" : "transparent",
-                              borderRadius: "8px",
-                              padding: "8px 15px 8px 45px",
-                              fontSize: "13px",
-                              fontWeight: isSubActive ? "500" : "400",
-                              transition: "all 0.3s ease",
-                              borderLeft: isSubActive ? "3px solid #ff9800" : "3px solid transparent",
-                              marginLeft: "10px"
-                            }}
-                            onMouseEnter={(e) => {
-                              if (!isSubActive) {
-                                e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
-                              }
-                            }}
-                            onMouseLeave={(e) => {
-                              if (!isSubActive) {
-                                e.currentTarget.style.backgroundColor = "transparent";
-                              }
-                            }}
-                          >
-                            {subItem.label}
-                          </Nav.Link>
-                        );
-                      })}
-                    </div>
-                  </Collapse>
-                )}
-              </div>
-            );
-          })}
-        </Nav>
-
-        {/* Bottom Section */}
-        <div className="border-top border-white border-opacity-10">
-          <Nav.Link
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              handleLogoutClick();
-            }}
-            className="text-white d-flex align-items-center gap-2"
-            style={{ 
-              padding: "12px 20px", 
-              fontSize: "14px",
-              transition: "background-color 0.3s ease"
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)"}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-            title={isCollapsed && !isMobile ? "Keluar" : ""}
-          >
-            <BoxArrowRight size={18} />
-            {(!isCollapsed || isMobile) && "Keluar"}
-          </Nav.Link>
-        </div>
+        
+        {isMobile ? (
+          <X 
+            size={24} 
+            style={{ cursor: "pointer", flexShrink: 0 }} 
+            onClick={() => setMobileOpen(false)}
+          />
+        ) : (
+          <List 
+            size={20} 
+            style={{ cursor: "pointer", flexShrink: 0 }} 
+            onClick={handleToggleSidebar}
+          />
+        )}
       </div>
-    </>
+
+      {/* User Section */}
+      {(!isCollapsed || isMobile) && (
+        <Dropdown className="border-bottom border-white border-opacity-10"> 
+          <Dropdown.Toggle
+            variant="link"
+            className="text-white text-decoration-none w-100"
+            style={{ 
+              backgroundColor: "transparent",
+              border: "none",
+              boxShadow: "none",
+              padding: "16px",
+              display: "flex",
+              alignItems: "center",
+              gap: "12px"
+            }}
+          >
+            <div 
+              style={{
+                width: "40px",
+                height: "40px",
+                backgroundColor: "rgba(255,255,255,0.2)",
+                borderRadius: "8px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0
+              }}
+            >
+              <User size={24} />
+            </div>
+            <div style={{ textAlign: "left", overflow: "hidden" }}>
+              <div style={{ fontSize: "14px", fontWeight: "500", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                {user?.guru?.nama || user?.name || "Admin"}
+              </div>
+              <div style={{ fontSize: "12px", opacity: 0.7 }}>
+                {user?.role?.nama || "User"}
+              </div>
+            </div>
+          </Dropdown.Toggle>
+
+          <Dropdown.Menu
+            style={{
+              backgroundColor: "rgb(28, 62, 112)",
+              padding: "4px",
+              width: "calc(100% - 32px)",
+              margin: "0 16px",
+              borderRadius: "8px",
+            }}
+          >
+            <Dropdown.Item
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                handleMenuClick("/profil");
+              }}
+              style={{
+                color: "white",
+                fontSize: "13px",
+                padding: "10px",
+                display: "flex",
+                alignItems: "center",
+                borderRadius: "6px",
+                backgroundColor: "transparent"
+              }}
+            >
+              <Person size={14} style={{ marginRight: "8px" }} />
+              Lihat Profil
+            </Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown>
+      )}
+
+      {/* Logo */}
+      {(!isCollapsed || isMobile) && (
+        <div style={{ textAlign: "center", padding: "20px 16px" }}>
+          <img 
+            src="https://hagiosschooloflife.sch.id/img/navbar/logo-hsol.webp" 
+            alt="Logo HSOL" 
+            style={{ width: "100%", maxWidth: "120px" }}
+          />
+        </div>
+      )}
+
+      {/* Menu Items */}
+      <Nav 
+        className="flex-column flex-grow-1" 
+        style={{ 
+          padding: "0 16px",
+          marginBottom: "0",
+          paddingBottom: "0"
+        }}
+      >
+        {currentMenuItems.map((item, index) => {
+          const Icon = item.icon;
+          const isActive = location.pathname === item.path;
+          const hasSubmenu = item.hasSubmenu;
+          const isSubmenuOpen = openSubmenu[item.label.toLowerCase()];
+          const isAnySubmenuActive = hasSubmenu && isSubmenuActive(item.submenu);
+
+          return (
+            <div key={index}>
+              {/* Main Menu Item */}
+              <Nav.Link
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (hasSubmenu) {
+                    handleToggleSubmenu(item.label);
+                  } else {
+                    handleMenuClick(item.path);
+                  }
+                }}
+                className="text-white position-relative"
+                style={{
+                  backgroundColor: (isActive || isAnySubmenuActive) ? "#ff9800" : "transparent",
+                  borderRadius: "12px",
+                  padding: "12px 16px",
+                  fontSize: "14px",
+                  fontWeight: (isActive || isAnySubmenuActive) ? "500" : "400",
+                  transition: "all 0.3s ease",
+                  marginBottom: "4px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px"
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive && !isAnySubmenuActive) {
+                    e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive && !isAnySubmenuActive) {
+                    e.currentTarget.style.backgroundColor = "transparent";
+                  }
+                }}
+              >
+                <Icon size={18} style={{ flexShrink: 0 }} />
+                {(!isCollapsed || isMobile) && (
+                  <>
+                    <span style={{ flex: 1 }}>{item.label}</span>
+                    {hasSubmenu && (
+                      isSubmenuOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />
+                    )}
+                  </>
+                )}
+                {(isActive || isAnySubmenuActive) && (
+                  <div 
+                    style={{
+                      position: "absolute",
+                      left: 0,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      width: "4px",
+                      height: "70%",
+                      backgroundColor: "#fff",
+                      borderRadius: "0 4px 4px 0"
+                    }}
+                  />
+                )}
+              </Nav.Link>
+
+              {/* Submenu */}
+              {hasSubmenu && (!isCollapsed || isMobile) && (
+                <Collapse in={isSubmenuOpen}>
+                  <div>
+                    {item.submenu.map((subItem, subIndex) => {
+                      const isSubActive = location.pathname === subItem.path;
+                      return (
+                        <Nav.Link
+                          key={subIndex}
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleMenuClick(subItem.path);
+                          }}
+                          className="text-white"
+                          style={{
+                            backgroundColor: isSubActive ? "rgba(255,152,0,0.3)" : "transparent",
+                            borderRadius: "8px",
+                            padding: "10px 16px 10px 48px",
+                            fontSize: "13px",
+                            fontWeight: isSubActive ? "500" : "400",
+                            transition: "all 0.3s ease",
+                            borderLeft: isSubActive ? "3px solid #ff9800" : "3px solid transparent",
+                            marginLeft: "12px",
+                            marginBottom: "2px"
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!isSubActive) {
+                              e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!isSubActive) {
+                              e.currentTarget.style.backgroundColor = "transparent";
+                            }
+                          }}
+                        >
+                          {subItem.label}
+                        </Nav.Link>
+                      );
+                    })}
+                  </div>
+                </Collapse>
+              )}
+            </div>
+          );
+        })}
+      </Nav>
+
+      {/* Logout Button */}
+      <div className="border-top border-white border-opacity-10">
+        <Nav.Link
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            handleLogoutClick();
+          }}
+          className="text-white"
+          style={{ 
+            padding: "16px", 
+            fontSize: "14px",
+            transition: "background-color 0.3s ease",
+            display: "flex",
+            alignItems: "center",
+            gap: "12px"
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)"}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+        >
+          <BoxArrowRight size={18} />
+          {(!isCollapsed || isMobile) && "Keluar"}
+        </Nav.Link>
+      </div>
+    </div>
   );
 }

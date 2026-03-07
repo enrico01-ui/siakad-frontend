@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import toast from "react-hot-toast";
 import Sidebar from "../components/Sidebar";
 import { useState, useEffect } from "react";
+import { List } from "react-bootstrap-icons";
 
 function MainLayout() {
   const user = localStorage.getItem("user");
@@ -17,14 +18,13 @@ function MainLayout() {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
       
-      // Auto-collapse on mobile
-      if (mobile) {
-        setIsCollapsed(false);
+      // Auto close mobile menu on resize to desktop
+      if (!mobile) {
         setMobileOpen(false);
       }
     };
 
-    handleResize(); // Initial check
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -33,18 +33,11 @@ function MainLayout() {
     toast.success("Logout berhasil!");
   };
 
-  // Calculate sidebar width based on state
-  const getSidebarWidth = () => {
-    if (isMobile) {
-      return 0; // No width on mobile when closed
-    }
-    return isCollapsed ? 80 : 250;
-  };
-
-  const sidebarWidth = getSidebarWidth();
+  // Calculate sidebar width - mobile is always 0 (overlay mode)
+  const sidebarWidth = isMobile ? 0 : (isCollapsed ? 80 : 250);
 
   return (
-    <div className="d-flex" style={{ position: "relative", minHeight: "100vh" }}>
+    <div style={{ position: "relative", minHeight: "100vh" }}>
       <Sidebar
         role={userRole}
         onLogout={handleLogout}
@@ -59,17 +52,17 @@ function MainLayout() {
       <div
         style={{
           marginLeft: `${sidebarWidth}px`,
-          width: `calc(100% - ${sidebarWidth}px)`,
+          width: isMobile ? "100%" : `calc(100% - ${sidebarWidth}px)`,
           minHeight: "100vh",
           backgroundColor: "#f8f9fa",
-          transition: "all 0.3s ease",
+          transition: "margin-left 0.3s ease, width 0.3s ease",
           position: "relative"
         }}
       >
         {/* Mobile Menu Button */}
         {isMobile && (
           <button
-            onClick={() => setMobileOpen(!mobileOpen)}
+            onClick={() => setMobileOpen(true)}
             style={{
               position: "fixed",
               top: "15px",
@@ -79,27 +72,23 @@ function MainLayout() {
               color: "white",
               border: "none",
               borderRadius: "8px",
-              padding: "10px 15px",
+              padding: "10px 12px",
               cursor: "pointer",
               boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
               display: "flex",
               alignItems: "center",
               gap: "8px",
-              fontSize: "14px",
+              fontSize: "13px",
               fontWeight: "500"
             }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-            Menu
+            <List size={20} />
+            <span>Menu</span>
           </button>
         )}
 
-        {/* Content with padding for mobile menu button */}
-        <div style={{ paddingTop: isMobile ? "60px" : "0" }}>
-          <Outlet />
-        </div>
+        {/* Content */}
+        <Outlet />
       </div>
 
       {/* Mobile Overlay */}
@@ -110,8 +99,8 @@ function MainLayout() {
             position: "fixed",
             top: 0,
             left: 0,
-            width: "100%",
-            height: "100%",
+            width: "100vw",
+            height: "100vh",
             backgroundColor: "rgba(0,0,0,0.5)",
             zIndex: 1500,
             transition: "opacity 0.3s ease"
