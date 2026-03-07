@@ -8,7 +8,7 @@ import Profil from "../pages/Profil.jsx";
 // ADMIN
 import AdminDashboard from "../pages/admin/Dashboard";
 import DataMaster from "../pages/admin/DataMaster.jsx";
-import Roles from "../pages/admin/Roles";
+
 import SemesterManagement from "../pages/admin/Semester.jsx";
 import PembayaranSPP from "../pages/admin/VerifSpp.jsx";
 import AbsensiGuru from "../pages/admin/AbsensiGuru.jsx";
@@ -44,7 +44,6 @@ export default function AppRoutes() {
         <Route element={<RoleRoute allow={["admin"]} />}>
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/datamaster" element={<DataMaster />} />
-          <Route path="/admin/roles" element={<Roles />} />
           <Route path="/admin/semester" element={<SemesterManagement />} />
           <Route path="/admin/verif-spp" element={<PembayaranSPP />} />
           <Route path="/admin/absensi-guru" element={<AbsensiGuru />} />
