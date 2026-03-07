@@ -11,6 +11,8 @@ import {
 import { getKelasSiswa } from "../../services/guruApi";
 import { getSemester as getSemesterList } from "../../services/semesterApi";
 import { uploadRaporFile, getRapor, deleteRapor } from "../../services/raporApi";
+import { updateSiswa } from "../../services/siswaApi";
+import { getKelas } from "../../services/kelasApi";
 
 export default function Kelas() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -19,6 +21,7 @@ export default function Kelas() {
   const [semesterList, setSemesterList] = useState([]);
   const [siswaList, setSiswaList] = useState([]);
   const [kelasList, setKelasList] = useState([]);
+  const [allKelasList, setAllKelasList] = useState([]);
   const [raporList, setRaporList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -30,7 +33,8 @@ export default function Kelas() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedSiswa, setSelectedSiswa] = useState(null);
   const [uploading, setUploading] = useState(false);
-
+  const [saving, setSaving] = useState(false); 
+  const [showEditModal, setShowEditModal] = useState(false); 
   // Upload form
   const [uploadForm, setUploadForm] = useState({
     siswa_id: "",
@@ -38,7 +42,13 @@ export default function Kelas() {
     tahun_ajaran: "",
     file: null
   });
-
+  const [editForm, setEditForm] = useState({
+    nis: "",
+    nama: "",
+    kelas_id: "",
+    tgl_lahir: "",
+    status: "AKTIF"
+  });
   useEffect(() => {
     const loadAllData = async () => {
       try {
@@ -51,7 +61,8 @@ export default function Kelas() {
         // ✅ STEP 2: Load kelas data in parallel
         let allSiswa = [];
         let kelasData = [];
-        
+        const allKelasResponse = await getKelas();
+        setAllKelasList(allKelasResponse.data || []);
         if (guru && guru.kelas && guru.kelas.length > 0) {
           // ✅ Parallel API calls for all kelas
           const kelasPromises = guru.kelas.map(kelas => 
@@ -178,6 +189,39 @@ export default function Kelas() {
     });
     setShowUploadModal(true);
   }, []);
+  const handleOpenEditModal = useCallback((siswa) => {
+    setSelectedSiswa(siswa);
+    setEditForm({
+      nis: siswa.nis || "",
+      nama: siswa.nama || "",
+      kelas_id: siswa.kelas_id || "",
+      tgl_lahir: siswa.tgl_lahir || "",
+      status: siswa.status || "AKTIF"
+    });
+    setShowEditModal(true);
+  }, []);
+
+  // ← TAMBAHKAN: Handle Update Siswa
+  const handleUpdateSiswa = async (e) => {
+    e.preventDefault();
+
+    if (!selectedSiswa) return;
+
+    try {
+      setSaving(true);
+      
+      await updateSiswa(selectedSiswa.id, editForm);
+      
+      alert("Data siswa berhasil diperbarui!");
+      setShowEditModal(false);
+      await reloadData();
+    } catch (error) {
+      console.error("Error updating siswa:", error);
+      alert("Gagal memperbarui data siswa: " + (error.response?.data?.message || error.message));
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleFileChange = useCallback((e) => {
     const file = e.target.files[0];
@@ -262,7 +306,13 @@ export default function Kelas() {
       tahun_ajaran: selectedSem ? selectedSem.tahun_ajaran : ""
     }));
   }, [semesterList]);
-
+  const handleEditFormChange = (e) => {
+    const { name, value } = e.target;
+    setEditForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
   return (
     <Container fluid className="p-4" style={{ backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
       {/* Header */}
@@ -404,6 +454,7 @@ export default function Kelas() {
               isWaliKelas={isWaliKelas}
               onUpload={handleOpenUploadModal}
               onViewDetail={handleViewDetail}
+              onEdit={handleOpenEditModal}
               getSiswaRapor={getSiswaRapor}
             />
           ) : (
@@ -414,7 +465,117 @@ export default function Kelas() {
           )}
         </Card.Body>
       </Card>
+       <Modal show={showEditModal} onHide={() => setShowEditModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <Pencil className="me-2" size={20} />
+            Edit Data Siswa
+          </Modal.Title>
+        </Modal.Header>
+        <Form onSubmit={handleUpdateSiswa}>
+          <Modal.Body>
+            {selectedSiswa && (
+              <Alert variant="info" className="mb-3">
+                <small>
+                  <strong>Edit data untuk:</strong> {selectedSiswa.nama} ({selectedSiswa.nis})
+                </small>
+              </Alert>
+            )}
 
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>NIS <span className="text-danger">*</span></Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="nis"
+                    value={editForm.nis}
+                    onChange={handleEditFormChange}
+                    required
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Nama Lengkap <span className="text-danger">*</span></Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="nama"
+                    value={editForm.nama}
+                    onChange={handleEditFormChange}
+                    required
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Kelas <span className="text-danger">*</span></Form.Label>
+                  <Form.Select
+                    name="kelas_id"
+                    value={editForm.kelas_id}
+                    onChange={handleEditFormChange}
+                    required
+                  >
+                    <option value="">Pilih Kelas</option>
+                    {allKelasList.map(kelas => (
+                      <option key={kelas.id} value={kelas.id}>
+                        {kelas.nama_kelas}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Tanggal Lahir</Form.Label>
+                  <Form.Control
+                    type="date"
+                    name="tgl_lahir"
+                    value={editForm.tgl_lahir}
+                    onChange={handleEditFormChange}
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Status <span className="text-danger">*</span></Form.Label>
+              <Form.Select
+                name="status"
+                value={editForm.status}
+                onChange={handleEditFormChange}
+                required
+              >
+                <option value="AKTIF">Aktif</option>
+                <option value="LULUS">Lulus</option>
+                <option value="PINDAH">Pindah</option>
+                <option value="KELUAR">Keluar</option>
+              </Form.Select>
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowEditModal(false)} disabled={saving}>
+              Batal
+            </Button>
+            <Button variant="primary" type="submit" disabled={saving}>
+              {saving ? (
+                <>
+                  <Spinner animation="border" size="sm" className="me-2" />
+                  Menyimpan...
+                </>
+              ) : (
+                <>
+                  <CheckCircle size={16} className="me-2" />
+                  Simpan Perubahan
+                </>
+              )}
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
       {/* Upload Rapor Modal */}
       <Modal show={showUploadModal} onHide={() => setShowUploadModal(false)} size="lg">
         <Modal.Header closeButton>
@@ -596,7 +757,89 @@ export default function Kelas() {
 }
 
 // Table Components
-const TableSiswa = memo(function TableSiswa({ data, isWaliKelas, onUpload, onViewDetail, getSiswaRapor }) {
+const TableSiswa = memo(function TableSiswa({ data, isWaliKelas, onUpload, onViewDetail, onEdit, getSiswaRapor }) {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  if (isMobile) {
+    // Mobile Card View
+    return (
+      <div>
+        {data.length > 0 ? (
+          data.map((siswa) => {
+            const raporCount = getSiswaRapor(siswa.id).length;
+            return (
+              <Card key={siswa.id} className="mb-3 shadow-sm">
+                <Card.Body className="p-3">
+                  <div className="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                      <h6 className="mb-1 fw-bold">{siswa.nama}</h6>
+                      <small className="text-muted">NIS: {siswa.nis || '-'}</small>
+                    </div>
+                    <Badge bg={siswa.status === 'AKTIF' ? 'success' : 'secondary'}>
+                      {siswa.status || 'AKTIF'}
+                    </Badge>
+                  </div>
+
+                  <div className="mb-2">
+                    <Badge bg="primary" className="me-2">
+                      {siswa.kelas?.nama_kelas || '-'}
+                    </Badge>
+                    {isWaliKelas && (
+                      <Badge bg={raporCount > 0 ? 'info' : 'secondary'}>
+                        {raporCount} rapor
+                      </Badge>
+                    )}
+                  </div>
+
+                  <div className="d-grid gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline-primary"
+                      onClick={() => onViewDetail(siswa)}
+                    >
+                      <Eye size={14} className="me-1" />
+                      Detail
+                    </Button>
+                    <div className="d-flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline-warning"
+                        className="flex-fill"
+                        onClick={() => onEdit(siswa)}
+                      >
+                        <Pencil size={14} className="me-1" />
+                        Edit
+                      </Button>
+                      {isWaliKelas && (
+                        <Button
+                          size="sm"
+                          variant="outline-success"
+                          className="flex-fill"
+                          onClick={() => onUpload(siswa)}
+                        >
+                          <Upload size={14} className="me-1" />
+                          Upload
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </Card.Body>
+              </Card>
+            );
+          })
+        ) : (
+          <Alert variant="secondary" className="text-center">
+            Tidak ada data siswa
+          </Alert>
+        )}
+      </div>
+    );
+  }
   return (
     <div style={{ overflowX: 'auto' }}>
       <Table hover responsive>
@@ -657,6 +900,14 @@ const TableSiswa = memo(function TableSiswa({ data, isWaliKelas, onUpload, onVie
                       <Eye size={14} className="me-1" />
                       Detail
                     </Button>
+                    <Button
+                        size="sm"
+                        variant="outline-warning"
+                        onClick={() => onEdit(siswa)}
+                        title="Edit Data"
+                      >
+                        <Pencil size={14} />
+                      </Button>
                     {isWaliKelas && (
                       <Button
                         size="sm"
