@@ -162,3 +162,43 @@
     font-size: 0.8125rem !important;
   }
 }
+
+/* Add to AdminResponsive.css */
+
+/* Ensure smooth transitions */
+* {
+  box-sizing: border-box;
+}
+
+/* Mobile menu button styling */
+@media screen and (max-width: 768px) {
+  .mobile-menu-btn {
+    position: fixed !important;
+    top: 15px !important;
+    left: 15px !important;
+    z-index: 1000 !important;
+  }
+}
+
+/* Prevent horizontal scroll */
+body {
+  overflow-x: hidden;
+}
+
+/* Sidebar scrollbar */
+.d-flex.flex-column::-webkit-scrollbar {
+  width: 6px;
+}
+
+.d-flex.flex-column::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.d-flex.flex-column::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.d-flex.flex-column::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}

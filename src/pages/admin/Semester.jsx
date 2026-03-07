@@ -7,7 +7,7 @@ import {
   Plus, Pencil, Trash, Search, Calendar, CheckCircle, XCircle
 } from "react-bootstrap-icons";
 import { getSemester, createSemester, aktifkanSemester } from "../../services/semesterApi";
-import './AdminResponsive.css';
+
 
 export default function SemesterManagement() {
   const [loading, setLoading] = useState(false);
