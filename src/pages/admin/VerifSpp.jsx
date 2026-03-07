@@ -267,30 +267,29 @@ export default function VerifikasiPembayaran() {
       <Card className="border-0 shadow-sm">
         <Card.Body className="p-3">
           {/* Search */}
-          <Row className="mb-3 g-2 align-items-start">
+          <Row className="mb-3 g-2 align-items-center">
             <Col xs={12} md={6}>
-              <div className="position-relative">
-                <InputGroup>
-                  <InputGroup.Text className="bg-white">
-                    <Search size={18} />
-                  </InputGroup.Text>
-                  <Form.Control
-                    placeholder="Cari nama, NIS, kelas..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </InputGroup>
-              </div>
+              <InputGroup>
+                <InputGroup.Text>
+                  <Search size={18} />
+                </InputGroup.Text>
+                <Form.Control
+                  placeholder="Cari nama, NIS, kelas..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="form-control-sm form-control-md-default"
+                />
+              </InputGroup>
             </Col>
             <Col xs={12} md={6}>
               {stats.pending > 0 && (
                 <Alert variant="warning" className="mb-0 py-2">
-                  <div className="d-flex align-items-center">
+                  <small className="d-flex align-items-center">
                     <InfoCircle size={16} className="me-2 flex-shrink-0" />
-                    <small className="mb-0">
+                    <span>
                       <strong>{stats.pending}</strong> pembayaran menunggu verifikasi
-                    </small>
-                  </div>
+                    </span>
+                  </small>
                 </Alert>
               )}
             </Col>
