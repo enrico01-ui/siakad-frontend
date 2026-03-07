@@ -200,6 +200,7 @@ export default function SemesterManagement() {
         <Card.Body className="p-3 p-md-4">
           <Row className="mb-3 g-2">
             <Col md={6}>
+            <div className="position-relative">
               <InputGroup>
                 <InputGroup.Text>
                   <Search size={18} />
@@ -210,6 +211,7 @@ export default function SemesterManagement() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </InputGroup>
+            </div>
             </Col>
             <Col xs={12} md={6} className="d-grid d-md-block text-md-end" >
               <Button variant="primary" onClick={handleAdd} disabled={loading}>

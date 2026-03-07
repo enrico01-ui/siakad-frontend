@@ -219,6 +219,7 @@ const handleFileChange = (e) => {
           {/* Search & Filter */}
           <Row className="mb-3">
             <Col md={6}>
+              <div className="position-relative">
               <InputGroup>
                 <InputGroup.Text>
                   <Search size={18} />
@@ -229,6 +230,7 @@ const handleFileChange = (e) => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </InputGroup>
+              </div>
             </Col>
             <Col md={6}>
               <Form.Select

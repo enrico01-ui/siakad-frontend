@@ -341,6 +341,7 @@ const filteredData = (tagihanData || []).filter(t =>
           {/* Filters - Responsive */}
           <Row className="mb-3 g-2">
             <Col xs={12} md={3}>
+            <div className="position-relative">
               <InputGroup size="sm">
                 <InputGroup.Text>
                   <Search size={18} />
@@ -351,6 +352,7 @@ const filteredData = (tagihanData || []).filter(t =>
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </InputGroup>
+              </div>
             </Col>
 
             <Col xs={4} md={2}>

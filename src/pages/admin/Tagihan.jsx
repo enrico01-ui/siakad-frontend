@@ -418,6 +418,7 @@ export default function TuitionFee() {
         <Card.Body className="p-3">
           <Row className="g-2">
             <Col xs={12} md={4}>
+              <div className="position-relative">
               <InputGroup size="sm">
                 <InputGroup.Text>
                   <Search size={18} />
@@ -428,6 +429,7 @@ export default function TuitionFee() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </InputGroup>
+              </div>
             </Col>
             <Col xs={6} md={4}>
               <Form.Select
