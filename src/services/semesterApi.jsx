@@ -8,3 +8,6 @@ export const createSemester = (data) =>
 export const aktifkanSemester = (id) =>
   api.put(`/semester/${id}/activate`);
 
+export const updateSemester = (id, data) =>
+  api.put(`/semester/${id}`, data);
+

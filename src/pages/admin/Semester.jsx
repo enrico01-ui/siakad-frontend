@@ -6,7 +6,7 @@ import {
 import { 
   Plus, Pencil, Trash, Search, Calendar, CheckCircle, XCircle
 } from "react-bootstrap-icons";
-import { getSemester, createSemester, aktifkanSemester } from "../../services/semesterApi";
+import { getSemester, createSemester, aktifkanSemester, updateSemester } from "../../services/semesterApi";
 
 
 export default function SemesterManagement() {
@@ -78,9 +78,8 @@ export default function SemesterManagement() {
         await createSemester(formData);
         alert("Semester berhasil ditambahkan!");
       } else {
-        // If you have update API, use it here
-        // For now, we'll just show message
-        alert("Fitur edit belum tersedia. Silakan hapus dan buat ulang.");
+        await updateSemester(selectedItem.id, formData);
+        alert("Semester berhasil diperbarui!");
       }
       
       setShowModal(false);
