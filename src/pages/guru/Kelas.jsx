@@ -6,7 +6,7 @@ import {
 } from "react-bootstrap";
 import { 
   People, Upload, Eye, Download, Trash, FileEarmarkPdf,
-  PersonCircle, Calendar, Search, CheckCircle
+  PersonCircle, Calendar, Search, CheckCircle, Pencil
 } from "react-bootstrap-icons";
 import { getKelasSiswa } from "../../services/guruApi";
 import { getSemester as getSemesterList } from "../../services/semesterApi";
