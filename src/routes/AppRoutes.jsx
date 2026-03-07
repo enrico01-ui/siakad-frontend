@@ -19,12 +19,9 @@ import TagihanNonBulanan from "../pages/admin/TagihanNonBulanan.jsx";
 // GURU
 import GuruDashboard from "../pages/guru/Dashboard";
 import Kelas from "../pages/guru/Kelas";
-import Rapor from "../pages/guru/Rapor";
+
 import RiwayatAbsensi from "../pages/guru/RiwayatAbsensi";
-// SISWA
-import SiswaDashboard from "../pages/siswa/Dashboard";
-import RaporSaya from "../pages/siswa/RaporSiswa.jsx";
-import SppSaya from "../pages/siswa/SppSiswa.jsx";
+
 
 import MainLayout from "../pages/MainLayout.jsx";
 
@@ -59,17 +56,10 @@ export default function AppRoutes() {
         <Route element={<RoleRoute allow={["guru","wali_kelas","coach","financial"]} />}>
           <Route path="/guru" element={<GuruDashboard />} />
           <Route path="/guru/kelas" element={<Kelas />} />
-          <Route path="/guru/rapor" element={<Rapor />} />
           <Route path="/guru/pengumuman" element={<PengumumanAdmin />} />
           <Route path="/guru/riwayat-absensi" element={<RiwayatAbsensi />} />
         </Route>
 
-        {/* SISWA */}
-        <Route element={<RoleRoute allow={["siswa"]} />}>
-          <Route path="/siswa" element={<SiswaDashboard />} />
-          <Route path="/siswa/rapor" element={<RaporSaya />} />
-          <Route path="/siswa/spp" element={<SppSaya />} />
-        </Route>
         <Route path="/profil" element={<Profil role={user?.role.nama}/>} />
       </Route>
     </Route>
