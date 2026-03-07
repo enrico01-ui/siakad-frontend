@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo} from "react";
 import { 
   Container, Row, Col, Card, Table, Badge, Button, 
   Modal, Form, InputGroup, Tabs, Tab, Alert, Spinner, Image 
@@ -25,13 +25,14 @@ export default function VerifikasiPembayaran() {
   const [processing, setProcessing] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [showImageModal, setShowImageModal] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  const checkMobile = () => setIsMobile(window.innerWidth < 768);
+  checkMobile(); // set nilai awal
+  window.addEventListener('resize', checkMobile);
+  return () => window.removeEventListener('resize', checkMobile);
+}, []);
   useEffect(() => {
     loadPembayaran();
   }, []);
@@ -115,25 +116,24 @@ export default function VerifikasiPembayaran() {
     }
   };
 
-  const getFilteredData = () => {
-    let filtered = pembayaranData;
+  const filteredData = useMemo(() => {
+  let filtered = pembayaranData;
 
-    // Filter by tab (status)
-    if (activeTab !== "semua") {
-      filtered = filtered.filter(item => item.status === activeTab);
-    }
+  if (activeTab !== "semua") {
+    filtered = filtered.filter(item => item.status === activeTab);
+  }
 
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(item => 
-        item.siswa?.nama?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.siswa?.nis?.includes(searchTerm) ||
-        item.siswa?.kelas?.nama_kelas?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
+  if (searchTerm) {
+    const query = searchTerm.toLowerCase();
+    filtered = filtered.filter(item =>
+      item.siswa?.nama?.toLowerCase().includes(query) ||
+      item.siswa?.nis?.toLowerCase().includes(query) ||  // ← tambah toLowerCase
+      item.siswa?.kelas?.nama_kelas?.toLowerCase().includes(query)
+    );
+  }
 
-    return filtered;
-  };
+  return filtered;
+}, [pembayaranData, activeTab, searchTerm]);
 
   const formatRupiah = (angka) => {
     return new Intl.NumberFormat('id-ID', {
@@ -160,7 +160,7 @@ export default function VerifikasiPembayaran() {
     return badges[status] || <Badge bg="secondary">{status}</Badge>;
   };
 
-  const filteredData = getFilteredData();
+  
 
   const stats = {
     pending: pembayaranData.filter(p => p.status === 'PENDING').length,
