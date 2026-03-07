@@ -193,82 +193,36 @@ export default function VerifikasiPembayaran() {
 
       {/* Stats Cards */}
       <Row className="g-2 g-md-3 mb-3 mb-md-4">
-        <Col xs={6} md={3}>
-          <Card className="border-0 shadow-sm h-100">
-            <Card.Body className="p-3">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <p className="text-muted mb-1 small">Total</p>
-                  <h4 className="mb-0 fw-bold text-primary">{stats.total}</h4>
-                  <small className="text-muted d-none d-md-block">Semua status</small>
-                </div>
-                <div className="bg-primary bg-opacity-10 p-2 rounded-3">
-                  <FileEarmarkText size={20} className="text-primary d-md-none" />
-                  <FileEarmarkText size={28} className="text-primary d-none d-md-block" />
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col xs={6} md={3}>
-          <Card className="border-0 shadow-sm h-100">
-            <Card.Body className="p-3">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <p className="text-muted mb-1 small">Pending</p>
-                  <h4 className="mb-0 fw-bold text-warning">{stats.pending}</h4>
-                  <small className="text-muted d-none d-md-block">Perlu ditinjau</small>
-                </div>
-                <div className="bg-warning bg-opacity-10 p-2 rounded-3">
-                  <Clock size={20} className="text-warning d-md-none" />
-                  <Clock size={28} className="text-warning d-none d-md-block" />
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col xs={6} md={3}>
-          <Card className="border-0 shadow-sm h-100">
-            <Card.Body className="p-3">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <p className="text-muted mb-1 small">Diterima</p>
-                  <h4 className="mb-0 fw-bold text-success">{stats.diterima}</h4>
-                  <small className="text-muted d-none d-md-block">Terverifikasi</small>
-                </div>
-                <div className="bg-success bg-opacity-10 p-2 rounded-3">
-                  <CheckCircle size={20} className="text-success d-md-none" />
-                  <CheckCircle size={28} className="text-success d-none d-md-block" />
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col xs={6} md={3}>
-          <Card className="border-0 shadow-sm h-100">
-            <Card.Body className="p-3">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <p className="text-muted mb-1 small">Ditolak</p>
-                  <h4 className="mb-0 fw-bold text-danger">{stats.ditolak}</h4>
-                  <small className="text-muted d-none d-md-block">Tidak valid</small>
-                </div>
-                <div className="bg-danger bg-opacity-10 p-2 rounded-3">
-                  <XCircle size={20} className="text-danger d-md-none" />
-                  <XCircle size={28} className="text-danger d-none d-md-block" />
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+  {[
+    { label: 'Total', value: stats.total, color: 'primary', icon: <FileEarmarkText size={20} className="text-primary" /> },
+    { label: 'Pending', value: stats.pending, color: 'warning', icon: <Clock size={20} className="text-warning" /> },
+    { label: 'Diterima', value: stats.diterima, color: 'success', icon: <CheckCircle size={20} className="text-success" /> },
+    { label: 'Ditolak', value: stats.ditolak, color: 'danger', icon: <XCircle size={20} className="text-danger" /> },
+  ].map(({ label, value, color, icon }) => (
+    <Col xs={6} md={3} key={label}>
+      <Card className="border-0 shadow-sm h-100">
+        <Card.Body className="p-3">
+          <div className="d-flex justify-content-between align-items-center">
+            <div>
+              <p className="text-muted mb-1 small">{label}</p>
+              <h4 className={`mb-0 fw-bold text-${color}`}>{value}</h4>
+            </div>
+            <div className={`bg-${color} bg-opacity-10 p-2 rounded-3`}>
+              {icon}
+            </div>
+          </div>
+        </Card.Body>
+      </Card>
+    </Col>
+  ))}
+</Row>
 
       {/* Main Card */}
       <Card className="border-0 shadow-sm">
         <Card.Body className="p-3">
           {/* Search */}
-          <Row className="mb-3 g-2 align-items-center">
-            <Col xs={12} md={6}>
+          <Row className="mb-3 g-2">
+            <Col xs={12}>
               <InputGroup>
                 <InputGroup.Text>
                   <Search size={18} />
@@ -277,12 +231,11 @@ export default function VerifikasiPembayaran() {
                   placeholder="Cari nama, NIS, kelas..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="form-control-sm form-control-md-default"
                 />
               </InputGroup>
             </Col>
-            <Col xs={12} md={6}>
-              {stats.pending > 0 && (
+            {stats.pending > 0 && (
+              <Col xs={12}>
                 <Alert variant="warning" className="mb-0 py-2">
                   <small className="d-flex align-items-center">
                     <InfoCircle size={16} className="me-2 flex-shrink-0" />
@@ -291,8 +244,8 @@ export default function VerifikasiPembayaran() {
                     </span>
                   </small>
                 </Alert>
-              )}
-            </Col>
+              </Col>
+            )}
           </Row>
 
           {/* Tabs */}
