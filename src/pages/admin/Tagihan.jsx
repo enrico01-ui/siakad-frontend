@@ -28,7 +28,13 @@ export default function TuitionFee() {
   const [selectedSiswa, setSelectedSiswa] = useState(null);
   const [selectedTagihan, setSelectedTagihan] = useState(null);
   const [processing, setProcessing] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const [nominalForm, setNominalForm] = useState({
     siswa_id: "",
     semester_id: 0, // Always 0 for tuition fee
@@ -317,19 +323,19 @@ export default function TuitionFee() {
   };
 
   return (
-    <Container fluid className="p-4" style={{ backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
-      <Row className="mb-4 align-items-center">
-        <Col>
+    <Container fluid className="p-3 p-md-4" style={{ backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
+      <Row className="mb-3 mb-md-4 align-items-center g-2">
+        <Col xs={12} md={8}>
           <h2 className="mb-0 fw-bold">Rekap Tagihan Tuition Fee</h2>
         </Col>
-        <Col xs="auto">
-          <Button variant="primary" onClick={handleOpenSetNominal} className="me-2">
+        <Col xs={12} md={4} className="d-grid d-md-flex gap-2 justify-content-md-end">
+          <Button variant="primary" onClick={handleOpenSetNominal} size="sm">
             <Plus size={18} className="me-2" />
-            Set Nominal Tagihan
+            Set Nominal
           </Button>
-          <Button variant="success" onClick={exportToExcel}>
+          <Button variant="success" onClick={exportToExcel} size="sm">
             <FileEarmarkExcel size={18} className="me-2" />
-            Export Excel
+            Export
           </Button>
         </Col>
       </Row>
@@ -340,62 +346,66 @@ export default function TuitionFee() {
       </Alert>
 
       {/* Stats Cards */}
-      <Row className="g-3 mb-4">
-        <Col lg={3} md={6}>
-          <Card className="border-0 shadow-sm">
-            <Card.Body>
+      <Row className="g-2 g-md-3 mb-3 mb-md-4">
+        <Col xs={6} md={3}>
+          <Card className="border-0 shadow-sm h-100">
+            <Card.Body className="p-3">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
                   <p className="text-muted mb-1 small">Total Siswa</p>
-                  <h3 className="mb-0 fw-bold text-primary">{stats.totalSiswa}</h3>
+                  <h4 className="mb-0 fw-bold text-primary">{stats.totalSiswa}</h4>
                 </div>
-                <div className="bg-primary bg-opacity-10 p-3 rounded-3">
-                  <People size={28} className="text-primary" />
+                <div className="bg-primary bg-opacity-10 p-2 rounded-3">
+                  <People size={20} className="text-primary d-md-none" />
+                  <People size={28} className="text-primary d-none d-md-block" />
                 </div>
               </div>
             </Card.Body>
           </Card>
         </Col>
-        <Col lg={3} md={6}>
-          <Card className="border-0 shadow-sm">
-            <Card.Body>
+        <Col xs={6} md={3}>
+          <Card className="border-0 shadow-sm h-100">
+            <Card.Body className="p-3">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
                   <p className="text-muted mb-1 small">Total Tagihan</p>
-                  <h4 className="mb-0 fw-bold text-info">{formatRupiah(stats.totalTagihan)}</h4>
+                  <h5 className="mb-0 fw-bold text-info">{formatRupiah(stats.totalTagihan)}</h5>
                 </div>
-                <div className="bg-info bg-opacity-10 p-3 rounded-3">
-                  <Calendar size={28} className="text-info" />
+                <div className="bg-info bg-opacity-10 p-2 rounded-3">
+                  <Calendar size={20} className="text-info d-md-none" />
+                  <Calendar size={28} className="text-info d-none d-md-block" />
                 </div>
               </div>
             </Card.Body>
           </Card>
         </Col>
-        <Col lg={3} md={6}>
-          <Card className="border-0 shadow-sm">
-            <Card.Body>
+        <Col xs={6} md={3}>
+          <Card className="border-0 shadow-sm h-100">
+            <Card.Body className="p-3">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
                   <p className="text-muted mb-1 small">Total Dibayar</p>
-                  <h4 className="mb-0 fw-bold text-success">{formatRupiah(stats.totalDibayar)}</h4>
+                  <h5 className="mb-0 fw-bold text-success">{formatRupiah(stats.totalDibayar)}</h5>
                 </div>
-                <div className="bg-success bg-opacity-10 p-3 rounded-3">
-                  <CashStack size={28} className="text-success" />
+                <div className="bg-success bg-opacity-10 p-2 rounded-3">
+                  <CashStack size={20} className="text-success d-md-none" />
+                  <CashStack size={28} className="text-success d-none d-md-block" />
                 </div>
               </div>
             </Card.Body>
           </Card>
         </Col>
-        <Col lg={3} md={6}>
-          <Card className="border-0 shadow-sm">
-            <Card.Body>
+        <Col xs={6} md={3}>
+          <Card className="border-0 shadow-sm h-100">
+            <Card.Body className="p-3">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
                   <p className="text-muted mb-1 small">Siswa Lunas</p>
-                  <h3 className="mb-0 fw-bold text-warning">{stats.lunas}</h3>
+                  <h4 className="mb-0 fw-bold text-warning">{stats.lunas}</h4>
                 </div>
-                <div className="bg-warning bg-opacity-10 p-3 rounded-3">
-                  <CheckCircle size={28} className="text-warning" />
+                <div className="bg-warning bg-opacity-10 p-2 rounded-3">
+                  <CheckCircle size={20} className="text-warning d-md-none" />
+                  <CheckCircle size={28} className="text-warning d-none d-md-block" />
                 </div>
               </div>
             </Card.Body>
@@ -405,22 +415,23 @@ export default function TuitionFee() {
 
       {/* ✅ Filters - Changed Semester to Tahun */}
       <Card className="border-0 shadow-sm mb-3">
-        <Card.Body>
-          <Row className="g-3">
-            <Col md={4}>
-              <InputGroup>
+        <Card.Body className="p-3">
+          <Row className="g-2">
+            <Col xs={12} md={4}>
+              <InputGroup size="sm">
                 <InputGroup.Text>
                   <Search size={18} />
                 </InputGroup.Text>
                 <Form.Control
-                  placeholder="Cari nama atau NIS siswa..."
+                  placeholder="Cari nama atau NIS..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </InputGroup>
             </Col>
-            <Col md={4}>
+            <Col xs={6} md={4}>
               <Form.Select
+                size="sm"
                 value={selectedKelas}
                 onChange={(e) => setSelectedKelas(e.target.value)}
               >
@@ -432,15 +443,15 @@ export default function TuitionFee() {
                 ))}
               </Form.Select>
             </Col>
-            {/* ✅ Changed from Semester to Tahun */}
-            <Col md={4}>
+            <Col xs={6} md={4}>
               <Form.Select
+                size="sm"
                 value={selectedTahun}
                 onChange={(e) => setSelectedTahun(e.target.value)}
               >
                 {tahunOptions.map(tahun => (
                   <option key={tahun} value={tahun}>
-                    Tahun Ajaran {tahun}/{tahun + 1}
+                    TA {tahun}/{tahun + 1}
                   </option>
                 ))}
               </Form.Select>
@@ -451,13 +462,95 @@ export default function TuitionFee() {
 
       {/* Main Table */}
       <Card className="border-0 shadow-sm">
-        <Card.Body style={{ overflowX: 'auto' }}>
+        <Card.Body className="p-3">
           {loading ? (
             <div className="text-center py-5">
               <Spinner animation="border" variant="primary" />
               <p className="mt-3">Memuat data...</p>
             </div>
+          ) : isMobile ? (
+            /* Mobile Card View */
+            <div>
+              {filteredData.length > 0 ? (
+                filteredData.map((data, idx) => (
+                  <Card key={data.siswa.id} className="mb-3 shadow-sm">
+                    <Card.Body className="p-3">
+                      <div className="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                          <h6 className="mb-1 fw-bold">{data.siswa.nama}</h6>
+                          <small className="text-muted">
+                            NIS: {data.siswa.nis || '-'} • {data.siswa.kelas?.nama_kelas || '-'}
+                          </small>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          variant="outline-primary"
+                          onClick={() => handleViewDetail(data)}
+                        >
+                          <Eye size={14} />
+                        </Button>
+                      </div>
+
+                      <div className="border-top pt-2 mt-2">
+                        <Row className="g-2">
+                          <Col xs={6}>
+                            <small className="text-muted d-block">Total Tagihan</small>
+                            <strong className="text-info">{formatRupiah(data.totalTagihan)}</strong>
+                          </Col>
+                          <Col xs={6}>
+                            <small className="text-muted d-block">Total Dibayar</small>
+                            <strong className="text-success">{formatRupiah(data.totalDibayar)}</strong>
+                          </Col>
+                        </Row>
+
+                        {/* Bulan Pills - Horizontal Scroll */}
+                        <div className="mt-3">
+                          <small className="text-muted d-block mb-2">Status Pembayaran per Bulan:</small>
+                          <div className="d-flex gap-2 overflow-auto pb-2">
+                            {bulanDisplay.map(item => {
+                              const tagihan = data.tagihan[item.key];
+                              const overdue = tagihan && isOverdue(tagihan.batas_bayar) && tagihan.status !== 'LUNAS';
+                              
+                              return (
+                                <div key={item.key} className="text-center" style={{ minWidth: '60px' }}>
+                                  <small className="text-muted d-block mb-1" style={{ fontSize: '10px' }}>
+                                    {item.label}
+                                  </small>
+                                  <Badge 
+                                    bg={
+                                      tagihan ? (
+                                        tagihan.status === 'LUNAS' ? 'success' : 
+                                        overdue ? 'danger' :
+                                        tagihan.sisa < tagihan.nominal ? 'warning' : 'secondary'
+                                      ) : 'light'
+                                    }
+                                    text={tagihan ? 'white' : 'dark'}
+                                    className="w-100"
+                                    style={{ fontSize: '10px' }}
+                                  >
+                                    {tagihan ? (
+                                      tagihan.status === 'LUNAS' ? '✓' : 
+                                      overdue ? '⚠' : '-'
+                                    ) : '-'}
+                                  </Badge>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                ))
+              ) : (
+                <Alert variant="secondary" className="text-center">
+                  Tidak ada data tagihan
+                </Alert>
+              )}
+            </div>
           ) : (
+            /* Desktop Table View */
+            <div style={{ overflowX: 'auto' }}>
             <Table hover bordered responsive size="sm" style={{ minWidth: '1400px' }}>
               <thead className="table-light">
                 <tr>
@@ -560,6 +653,7 @@ export default function TuitionFee() {
                 </tfoot>
               )}
             </Table>
+            </div>
           )}
         </Card.Body>
       </Card>

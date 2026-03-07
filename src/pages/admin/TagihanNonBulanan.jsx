@@ -50,7 +50,13 @@ export default function TagihanNonBulanan({ jenisTagihan }) {
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedTagihan, setSelectedTagihan] = useState(null);
-  
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const getBulanNama = (bulan) => {
     const namaBulan = [
       'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -258,7 +264,7 @@ const filteredData = (tagihanData || []).filter(t =>
   };
 
   return (
-    <Container fluid className="p-4" style={{ backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
+    <Container fluid className="p-3 p-md-4" style={{ backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
       <h2 className="mb-4 fw-bold">Tagihan {currentLabel}</h2>
 
       {semesterAktif && (
@@ -268,58 +274,61 @@ const filteredData = (tagihanData || []).filter(t =>
       )}
 
       {/* Stats Cards */}
-      <Row className="g-3 mb-4">
-        <Col lg={3} md={6}>
-          <Card className="border-0 shadow-sm">
-            <Card.Body>
+      <Row className="g-2 g-md-3 mb-3 mb-md-4">
+        <Col xs={6} lg={3}>
+          <Card className="border-0 shadow-sm h-100">
+            <Card.Body className="p-3">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
-                  <p className="text-muted mb-1 small">Total Tagihan</p>
-                  <h3 className="mb-0 fw-bold text-primary">{stats.total}</h3>
+                  <p className="text-muted mb-1 small">Total</p>
+                  <h4 className="mb-0 fw-bold text-primary">{stats.total}</h4>
                 </div>
-                <div className="bg-primary bg-opacity-10 p-3 rounded-3">
-                  <FileEarmarkText size={28} className="text-primary" />
+                <div className="bg-primary bg-opacity-10 p-2 rounded-3">
+                  <FileEarmarkText size={20} className="text-primary d-md-none" />
+                  <FileEarmarkText size={28} className="text-primary d-none d-md-block" />
                 </div>
               </div>
             </Card.Body>
           </Card>
         </Col>
-        <Col lg={3} md={6}>
-          <Card className="border-0 shadow-sm">
-            <Card.Body>
+        <Col xs={6} lg={3}>
+          <Card className="border-0 shadow-sm h-100">
+            <Card.Body className="p-3">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
                   <p className="text-muted mb-1 small">Lunas</p>
-                  <h3 className="mb-0 fw-bold text-success">{stats.lunas}</h3>
+                  <h4 className="mb-0 fw-bold text-success">{stats.lunas}</h4>
                 </div>
-                <div className="bg-success bg-opacity-10 p-3 rounded-3">
-                  <CashCoin size={28} className="text-success" />
+                <div className="bg-success bg-opacity-10 p-2 rounded-3">
+                  <CashCoin size={20} className="text-success d-md-none" />
+                  <CashCoin size={28} className="text-success d-none d-md-block" />
                 </div>
               </div>
             </Card.Body>
           </Card>
         </Col>
-        <Col lg={3} md={6}>
-          <Card className="border-0 shadow-sm">
-            <Card.Body>
+        <Col xs={6} lg={3}>
+          <Card className="border-0 shadow-sm h-100">
+            <Card.Body className="p-3">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
                   <p className="text-muted mb-1 small">Belum Lunas</p>
-                  <h3 className="mb-0 fw-bold text-warning">{stats.belumLunas}</h3>
+                  <h4 className="mb-0 fw-bold text-warning">{stats.belumLunas}</h4>
                 </div>
-                <div className="bg-warning bg-opacity-10 p-3 rounded-3">
-                  <CashCoin size={28} className="text-warning" />
+                <div className="bg-warning bg-opacity-10 p-2 rounded-3">
+                  <CashCoin size={20} className="text-warning d-md-none" />
+                  <CashCoin size={28} className="text-warning d-none d-md-block" />
                 </div>
               </div>
             </Card.Body>
           </Card>
         </Col>
-        <Col lg={3} md={6}>
-          <Card className="border-0 shadow-sm">
-            <Card.Body>
+        <Col xs={6} lg={3}>
+          <Card className="border-0 shadow-sm h-100">
+            <Card.Body className="p-3">
               <div>
                 <p className="text-muted mb-1 small">Total Sisa</p>
-                <h5 className="mb-0 fw-bold text-danger">{formatRupiah(stats.totalSisa)}</h5>
+                <h6 className="mb-0 fw-bold text-danger">{formatRupiah(stats.totalSisa)}</h6>
               </div>
             </Card.Body>
           </Card>
@@ -328,11 +337,11 @@ const filteredData = (tagihanData || []).filter(t =>
 
       {/* Main Card */}
       <Card className="border-0 shadow-sm">
-        <Card.Body>
-          {/* Filters & Actions */}
-          <Row className="mb-3 align-items-center">
-            <Col md={3}>
-              <InputGroup>
+        <Card.Body className="p-3">
+          {/* Filters - Responsive */}
+          <Row className="mb-3 g-2">
+            <Col xs={12} md={3}>
+              <InputGroup size="sm">
                 <InputGroup.Text>
                   <Search size={18} />
                 </InputGroup.Text>
@@ -344,8 +353,9 @@ const filteredData = (tagihanData || []).filter(t =>
               </InputGroup>
             </Col>
 
-            <Col md={2}>
+            <Col xs={4} md={2}>
               <Form.Select
+                size="sm"
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(e.target.value)}
               >
@@ -355,8 +365,9 @@ const filteredData = (tagihanData || []).filter(t =>
               </Form.Select>
             </Col>
 
-            <Col md={2}>
+            <Col xs={4} md={2}>
               <Form.Select
+                size="sm"
                 value={filterKelas}
                 onChange={(e) => setFilterKelas(e.target.value)}
               >
@@ -367,31 +378,33 @@ const filteredData = (tagihanData || []).filter(t =>
               </Form.Select>
             </Col>
 
-            <Col md={2}>
+            <Col xs={4} md={2}>
               <Form.Select
+                size="sm"
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
               >
-                <option value="all">Semua Status</option>
+                <option value="all">Semua</option>
                 <option value="lunas">Lunas</option>
-                <option value="belum_bayar">Belum Lunas</option>
+                <option value="belum_bayar">Belum</option>
               </Form.Select>
             </Col>
 
-            <Col md={3} className="text-end">
+            <Col xs={12} md={3} className="d-grid d-md-flex gap-2">
               <Button
                 variant="success"
-                className="me-2"
                 size="sm"
                 onClick={() => setShowBulkModal(true)}
+                className="flex-fill flex-md-grow-0"
               >
                 <Plus size={16} className="me-1" />
-                Buat Massal
+                Massal
               </Button>
               <Button
                 variant="primary"
                 size="sm"
                 onClick={() => setShowAddModal(true)}
+                className="flex-fill flex-md-grow-0"
               >
                 <Plus size={16} className="me-1" />
                 Tambah
@@ -405,7 +418,99 @@ const filteredData = (tagihanData || []).filter(t =>
               <Spinner animation="border" variant="primary" />
               <p className="mt-3">Memuat data...</p>
             </div>
+          ) : isMobile ? (
+            /* Mobile Card View */
+            <div>
+              {filteredData.length > 0 ? (
+                filteredData.map((tagihan, index) => (
+                  <Card key={tagihan.id} className="mb-3 shadow-sm">
+                    <Card.Body className="p-3">
+                      <div className="d-flex justify-content-between align-items-start mb-2">
+                        <div className="flex-grow-1">
+                          <h6 className="mb-1 fw-bold">{tagihan.siswa?.nama || '-'}</h6>
+                          <small className="text-muted d-block">
+                            NIS: {tagihan.siswa?.nis || '-'}
+                          </small>
+                          <Badge bg="info" className="mt-1">
+                            {tagihan.siswa?.kelas?.nama_kelas || '-'}
+                          </Badge>
+                        </div>
+                        <Badge bg={tagihan.status === "LUNAS" ? "success" : "warning"}>
+                          {tagihan.status === "LUNAS" ? "Lunas" : "Belum"}
+                        </Badge>
+                      </div>
+
+                      <div className="border-top pt-2 mt-2">
+                        <Row className="g-2 mb-2">
+                          <Col xs={6}>
+                            <small className="text-muted d-block">Periode</small>
+                            <strong>{tagihan.periode || '-'}</strong>
+                          </Col>
+                          <Col xs={6}>
+                            <small className="text-muted d-block">Tahun</small>
+                            <strong>{tagihan.tahun}</strong>
+                          </Col>
+                        </Row>
+
+                        {tagihan.batas_bayar && (
+                          <div className="mb-2">
+                            <small className="text-muted d-block">Batas Bayar</small>
+                            <div className={isOverdue(tagihan.batas_bayar) && tagihan.status !== 'lunas' ? 'text-danger fw-bold' : ''}>
+                              {new Date(tagihan.batas_bayar).toLocaleDateString('id-ID')}
+                              {isOverdue(tagihan.batas_bayar) && tagihan.status !== 'lunas' && (
+                                <Badge bg="danger" className="ms-2">Terlambat</Badge>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        <Row className="g-2 mb-2">
+                          <Col xs={4}>
+                            <small className="text-muted d-block">Nominal</small>
+                            <strong className="text-info">{formatRupiah(tagihan.nominal_tagihan)}</strong>
+                          </Col>
+                          <Col xs={4}>
+                            <small className="text-muted d-block">Dibayar</small>
+                            <strong className="text-success">{formatRupiah(tagihan.total_dibayar)}</strong>
+                          </Col>
+                          <Col xs={4}>
+                            <small className="text-muted d-block">Sisa</small>
+                            <strong className="text-danger">{formatRupiah(tagihan.sisa)}</strong>
+                          </Col>
+                        </Row>
+
+                        <div className="d-flex gap-2 mt-3">
+                          <Button
+                            size="sm"
+                            variant="outline-primary"
+                            className="flex-fill"
+                            onClick={() => handleViewDetail(tagihan)}
+                          >
+                            <Eye size={14} className="me-1" />
+                            Detail
+                          </Button>
+                          {tagihan.total_dibayar <= 0 && (
+                            <Button
+                              size="sm"
+                              variant="outline-danger"
+                              onClick={() => handleDelete(tagihan.id)}
+                            >
+                              <Trash size={14} />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                ))
+              ) : (
+                <Alert variant="secondary" className="text-center">
+                  Tidak ada data tagihan
+                </Alert>
+              )}
+            </div>
           ) : (
+            <div style={{ overflowX: 'auto' }}>
             <Table hover responsive>
               <thead className="table-light">
                 <tr>
@@ -500,6 +605,7 @@ const filteredData = (tagihanData || []).filter(t =>
                 </tfoot>
               )}
             </Table>
+            </div>
           )}
         </Card.Body>
       </Card>

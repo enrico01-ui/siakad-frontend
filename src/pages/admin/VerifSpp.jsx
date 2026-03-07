@@ -25,7 +25,13 @@ export default function VerifikasiPembayaran() {
   const [processing, setProcessing] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [showImageModal, setShowImageModal] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   useEffect(() => {
     loadPembayaran();
   }, []);
@@ -164,83 +170,92 @@ export default function VerifikasiPembayaran() {
   };
 
   return (
-    <Container fluid className="p-4" style={{ backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
+    <Container fluid className="p-3 p-md-4" style={{ backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
       {/* Header */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <h2 className="fw-bold mb-1">
-            <CreditCard size={32} className="me-2 text-primary" />
-            Verifikasi Pembayaran SPP
-          </h2>
-          <p className="text-muted mb-0">Kelola dan verifikasi pembayaran siswa</p>
+      <div className="mb-3 mb-md-4">
+        <div className="d-flex align-items-center mb-2">
+          <CreditCard size={28} className="me-2 text-primary d-none d-md-block" />
+          <CreditCard size={24} className="me-2 text-primary d-md-none" />
+          <div className="flex-grow-1">
+            <h3 className="fw-bold mb-0 d-none d-md-block">Verifikasi Pembayaran SPP</h3>
+            <h5 className="fw-bold mb-0 d-md-none">Verifikasi Pembayaran</h5>
+            <p className="text-muted mb-0 small">Kelola dan verifikasi pembayaran siswa</p>
+          </div>
+          <Button variant="outline-primary" onClick={loadPembayaran} size="sm">
+            <Download size={16} className="d-md-none" />
+            <span className="d-none d-md-inline">
+              <Download size={18} className="me-2" />
+              Refresh
+            </span>
+          </Button>
         </div>
-        <Button variant="outline-primary" onClick={loadPembayaran}>
-          <Download size={18} className="me-2" />
-          Refresh
-        </Button>
       </div>
 
       {/* Stats Cards */}
-      <Row className="g-3 mb-4">
-        <Col lg={3} md={6}>
+      <Row className="g-2 g-md-3 mb-3 mb-md-4">
+        <Col xs={6} md={3}>
           <Card className="border-0 shadow-sm h-100">
-            <Card.Body>
+            <Card.Body className="p-3">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
-                  <p className="text-muted mb-1 small">Total Pembayaran</p>
-                  <h3 className="mb-0 fw-bold text-primary">{stats.total}</h3>
-                  <small className="text-muted">Semua status</small>
+                  <p className="text-muted mb-1 small">Total</p>
+                  <h4 className="mb-0 fw-bold text-primary">{stats.total}</h4>
+                  <small className="text-muted d-none d-md-block">Semua status</small>
                 </div>
-                <div className="bg-primary bg-opacity-10 p-3 rounded-3">
-                  <FileEarmarkText size={28} className="text-primary" />
+                <div className="bg-primary bg-opacity-10 p-2 rounded-3">
+                  <FileEarmarkText size={20} className="text-primary d-md-none" />
+                  <FileEarmarkText size={28} className="text-primary d-none d-md-block" />
                 </div>
               </div>
             </Card.Body>
           </Card>
         </Col>
-        <Col lg={3} md={6}>
+        <Col xs={6} md={3}>
           <Card className="border-0 shadow-sm h-100">
-            <Card.Body>
+            <Card.Body className="p-3">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
-                  <p className="text-muted mb-1 small">Menunggu Verifikasi</p>
-                  <h3 className="mb-0 fw-bold text-warning">{stats.pending}</h3>
-                  <small className="text-muted">Perlu ditinjau</small>
+                  <p className="text-muted mb-1 small">Pending</p>
+                  <h4 className="mb-0 fw-bold text-warning">{stats.pending}</h4>
+                  <small className="text-muted d-none d-md-block">Perlu ditinjau</small>
                 </div>
-                <div className="bg-warning bg-opacity-10 p-3 rounded-3">
-                  <Clock size={28} className="text-warning" />
+                <div className="bg-warning bg-opacity-10 p-2 rounded-3">
+                  <Clock size={20} className="text-warning d-md-none" />
+                  <Clock size={28} className="text-warning d-none d-md-block" />
                 </div>
               </div>
             </Card.Body>
           </Card>
         </Col>
-        <Col lg={3} md={6}>
+        <Col xs={6} md={3}>
           <Card className="border-0 shadow-sm h-100">
-            <Card.Body>
+            <Card.Body className="p-3">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
                   <p className="text-muted mb-1 small">Diterima</p>
-                  <h3 className="mb-0 fw-bold text-success">{stats.diterima}</h3>
-                  <small className="text-muted">Terverifikasi</small>
+                  <h4 className="mb-0 fw-bold text-success">{stats.diterima}</h4>
+                  <small className="text-muted d-none d-md-block">Terverifikasi</small>
                 </div>
-                <div className="bg-success bg-opacity-10 p-3 rounded-3">
-                  <CheckCircle size={28} className="text-success" />
+                <div className="bg-success bg-opacity-10 p-2 rounded-3">
+                  <CheckCircle size={20} className="text-success d-md-none" />
+                  <CheckCircle size={28} className="text-success d-none d-md-block" />
                 </div>
               </div>
             </Card.Body>
           </Card>
         </Col>
-        <Col lg={3} md={6}>
+        <Col xs={6} md={3}>
           <Card className="border-0 shadow-sm h-100">
-            <Card.Body>
+            <Card.Body className="p-3">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
                   <p className="text-muted mb-1 small">Ditolak</p>
-                  <h3 className="mb-0 fw-bold text-danger">{stats.ditolak}</h3>
-                  <small className="text-muted">Tidak valid</small>
+                  <h4 className="mb-0 fw-bold text-danger">{stats.ditolak}</h4>
+                  <small className="text-muted d-none d-md-block">Tidak valid</small>
                 </div>
-                <div className="bg-danger bg-opacity-10 p-3 rounded-3">
-                  <XCircle size={28} className="text-danger" />
+                <div className="bg-danger bg-opacity-10 p-2 rounded-3">
+                  <XCircle size={20} className="text-danger d-md-none" />
+                  <XCircle size={28} className="text-danger d-none d-md-block" />
                 </div>
               </div>
             </Card.Body>
@@ -250,26 +265,28 @@ export default function VerifikasiPembayaran() {
 
       {/* Main Card */}
       <Card className="border-0 shadow-sm">
-        <Card.Body>
+        <Card.Body className="p-3">
           {/* Search */}
-          <Row className="mb-3">
-            <Col md={6}>
-              <InputGroup>
+          <Row className="mb-3 g-2">
+            <Col xs={12} md={6}>
+              <InputGroup size="sm">
                 <InputGroup.Text>
                   <Search size={18} />
                 </InputGroup.Text>
                 <Form.Control
-                  placeholder="Cari nama siswa, NIS, atau kelas..."
+                  placeholder="Cari nama, NIS, kelas..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </InputGroup>
             </Col>
-            <Col md={6} className="text-end">
+            <Col xs={12} md={6}>
               {stats.pending > 0 && (
-                <Alert variant="warning" className="mb-0 py-2 d-inline-flex align-items-center">
-                  <InfoCircle size={18} className="me-2" />
-                  <strong>{stats.pending}</strong>&nbsp;pembayaran menunggu verifikasi
+                <Alert variant="warning" className="mb-0 py-2">
+                  <small className="d-flex align-items-center">
+                    <InfoCircle size={16} className="me-2" />
+                    <strong>{stats.pending}</strong>&nbsp;pembayaran menunggu verifikasi
+                  </small>
                 </Alert>
               )}
             </Col>
@@ -279,41 +296,41 @@ export default function VerifikasiPembayaran() {
           <Tabs
             activeKey={activeTab}
             onSelect={(k) => setActiveTab(k)}
-            className="mb-3"
+            className="mb-3 nav-fill"
           >
             <Tab 
               eventKey="semua" 
               title={
-                <span>
-                  <FileEarmarkText size={16} className="me-1" />
-                  Semua ({stats.total})
+                <span className="d-flex align-items-center justify-content-center gap-1">
+                  <FileEarmarkText size={14} />
+                  <span className="d-none d-md-inline">Semua</span> ({stats.total})
                 </span>
               } 
             />
             <Tab 
               eventKey="PENDING" 
               title={
-                <span>
-                  <Clock size={16} className="me-1" />
-                  Menunggu ({stats.pending})
+                <span className="d-flex align-items-center justify-content-center gap-1">
+                  <Clock size={14} />
+                  <span className="d-none d-md-inline">Pending</span> ({stats.pending})
                 </span>
               } 
             />
             <Tab 
               eventKey="DITERIMA" 
               title={
-                <span>
-                  <CheckCircle size={16} className="me-1" />
-                  Diterima ({stats.diterima})
+                <span className="d-flex align-items-center justify-content-center gap-1">
+                  <CheckCircle size={14} />
+                  <span className="d-none d-md-inline">Diterima</span> ({stats.diterima})
                 </span>
               } 
             />
             <Tab 
               eventKey="DITOLAK" 
               title={
-                <span>
-                  <XCircle size={16} className="me-1" />
-                  Ditolak ({stats.ditolak})
+                <span className="d-flex align-items-center justify-content-center gap-1">
+                  <XCircle size={14} />
+                  <span className="d-none d-md-inline">Ditolak</span> ({stats.ditolak})
                 </span>
               } 
             />
@@ -325,7 +342,72 @@ export default function VerifikasiPembayaran() {
               <Spinner animation="border" variant="primary" />
               <p className="mt-3">Memuat data...</p>
             </div>
+          ) : isMobile ? (
+            /* Mobile Card View */
+            <div>
+              {filteredData.length > 0 ? (
+                filteredData.map((payment) => (
+                  <Card key={payment.id} className="mb-3 shadow-sm">
+                    <Card.Body className="p-3">
+                      <div className="d-flex justify-content-between align-items-start mb-2">
+                        <div className="flex-grow-1">
+                          <h6 className="mb-1 fw-bold">{payment.siswa?.nama || '-'}</h6>
+                          <small className="text-muted d-block">
+                            NIS: {payment.siswa?.nis || '-'}
+                          </small>
+                          <Badge bg="secondary" className="mt-1">
+                            {payment.siswa?.kelas?.nama_kelas || '-'}
+                          </Badge>
+                        </div>
+                        <div style={{ minWidth: '90px' }}>
+                          {getStatusBadge(payment.status)}
+                        </div>
+                      </div>
+
+                      <div className="border-top pt-2 mt-2">
+                        <Row className="g-2 mb-2">
+                          <Col xs={6}>
+                            <small className="text-muted d-block">Tanggal</small>
+                            <strong>
+                              {new Date(payment.created_at).toLocaleDateString('id-ID', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric'
+                              })}
+                            </strong>
+                          </Col>
+                          <Col xs={6}>
+                            <small className="text-muted d-block">Periode</small>
+                            <strong>{getBulanNama(payment.bulan)} {payment.tahun}</strong>
+                          </Col>
+                        </Row>
+
+                        <div className="mb-2">
+                          <small className="text-muted d-block">Nominal</small>
+                          <h5 className="mb-0 fw-bold text-success">{formatRupiah(payment.jumlah)}</h5>
+                        </div>
+
+                        <Button
+                          size="sm"
+                          variant="outline-primary"
+                          className="w-100 mt-2"
+                          onClick={() => handleViewDetail(payment)}
+                        >
+                          <Eye size={14} className="me-1" />
+                          Lihat Detail
+                        </Button>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                ))
+              ) : (
+                <Alert variant="secondary" className="text-center">
+                  {searchTerm ? 'Tidak ada hasil pencarian' : 'Belum ada data pembayaran'}
+                </Alert>
+              )}
+            </div>
           ) : (
+            <div style={{ overflowX: 'auto' }}>
             <Table hover responsive>
               <thead className="table-light">
                 <tr>
@@ -387,6 +469,7 @@ export default function VerifikasiPembayaran() {
                 )}
               </tbody>
             </Table>
+            </div>
           )}
         </Card.Body>
       </Card>
@@ -406,6 +489,7 @@ export default function VerifikasiPembayaran() {
         getStatusBadge={getStatusBadge}
         showImageModal={showImageModal}
         setShowImageModal={setShowImageModal}
+        isMobile={isMobile}
       />
     </Container>
   );
@@ -425,7 +509,8 @@ function DetailPembayaranModal({
   getBulanNama,
   getStatusBadge,
   showImageModal,
-  setShowImageModal
+  setShowImageModal,
+  isMobile
 }) {
   if (!payment) return null;
 
@@ -440,21 +525,24 @@ function DetailPembayaranModal({
 
   return (
     <>
-      <Modal show={show} onHide={onHide} size="xl">
+      <Modal show={show} onHide={onHide} size={isMobile ? "lg" : "xl"}
+        fullscreen={isMobile ? "md-down" : false} >
         <Modal.Header closeButton className="bg-light">
           <Modal.Title>
-            <CreditCard className="me-2" />
-            Detail Pembayaran SPP
+            <CreditCard className="me-2" size={isMobile ? 20 : 24} />
+            <span style={{ fontSize: isMobile ? '16px' : '20px' }}>
+              Detail Pembayaran SPP
+            </span>
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Row>
             {/* Siswa Info Card */}
-            <Col md={6} className="mb-3">
+            <Col xs={12} md={6}>
               <Card className="h-100 border-0 bg-light">
-                <Card.Body>
+                <Card.Body className={isMobile ? "p-3" : ""}>
                   <h6 className="fw-bold mb-3 d-flex align-items-center">
-                    <Person size={20} className="me-2 text-primary" />
+                    <Person size={18} className="me-2 text-primary" />
                     Informasi Siswa
                   </h6>
                   <Table borderless size="sm" className="mb-0">
@@ -480,11 +568,11 @@ function DetailPembayaranModal({
             </Col>
 
             {/* Payment Info Card */}
-            <Col md={6} className="mb-3">
+            <Col xs={12} md={6}>
               <Card className="h-100 border-0 bg-light">
-                <Card.Body>
+                <Card.Body className={isMobile ? "p-3" : ""}>
                   <h6 className="fw-bold mb-3 d-flex align-items-center">
-                    <FileEarmarkText size={20} className="me-2 text-primary" />
+                    <FileEarmarkText size={18} className="me-2 text-primary" />
                     Informasi Pembayaran
                   </h6>
                   <Table borderless size="sm" className="mb-0">
@@ -522,10 +610,10 @@ function DetailPembayaranModal({
             </Col>
 
             {/* Breakdown Tagihan */}
-            <Col md={12} className="mb-3">
+            <Col xs={12}>
               <Card className="border-0 bg-light">
-                <Card.Body>
-                  <h6 className="fw-bold mb-3">Rincian Tagihan yang Dibayar</h6>
+                <Card.Body className={isMobile ? "p-3" : ""}>
+                  <h6 className="fw-bold mb-3">Rincian Tagihan</h6>
                   
                   {payment.breakdown && (
                     <Alert variant="info" className="mb-3">
@@ -533,7 +621,7 @@ function DetailPembayaranModal({
                       {payment.breakdown}
                     </Alert>
                   )}
-
+                  <div style={{ overflowX: 'auto' }}>
                   <Table bordered hover size="sm" className="mb-0">
                     <thead className="table-light">
                       <tr>
@@ -564,14 +652,15 @@ function DetailPembayaranModal({
                       </tr>
                     </tfoot>
                   </Table>
+                  </div>
                 </Card.Body>
               </Card>
             </Col>
 
             {/* Bukti Transfer */}
-            <Col md={12} className="mb-3">
+             <Col xs={12}>
               <Card className="border-0 bg-light">
-                <Card.Body>
+                <Card.Body className={isMobile ? "p-3" : ""}>
                   <h6 className="fw-bold mb-3">Bukti Transfer</h6>
                   <div className="text-center position-relative">
                     {payment.bukti_transfer ? (
@@ -617,11 +706,11 @@ function DetailPembayaranModal({
 
             {/* Verifikasi Section - Only show if PENDING */}
             {isPending && (
-              <Col md={12}>
+              <Col xs={12}>
                 <Card className="border-warning bg-warning bg-opacity-10">
-                  <Card.Body>
+                  <Card.Body className={isMobile ? "p-3" : ""}>
                     <h6 className="fw-bold mb-3 text-warning">
-                      <Clock size={20} className="me-2" />
+                      <Clock size={18} className="me-2" />
                       Verifikasi Pembayaran
                     </h6>
                     
@@ -652,13 +741,13 @@ function DetailPembayaranModal({
 
             {/* Verifikasi Info - Show if already verified */}
             {!isPending && payment.tanggal_verifikasi && (
-              <Col md={12}>
+              <Col xs={12}>
                 <Alert variant={payment.status === 'DITERIMA' ? 'success' : 'danger'}>
                   <div className="d-flex align-items-start">
                     {payment.status === 'DITERIMA' ? (
-                      <CheckCircle size={24} className="me-2 mt-1" />
+                      <CheckCircle size={24} className="me-2 mt-1 flex-shrink-0" />
                     ) : (
-                      <XCircle size={24} className="me-2 mt-1" />
+                      <XCircle size={24} className="me-2 mt-1 flex-shrink-0" />
                     )}
                     <div className="flex-grow-1">
                       <strong className="d-block mb-2">
@@ -687,15 +776,22 @@ function DetailPembayaranModal({
           </Row>
         </Modal.Body>
         <Modal.Footer className="bg-light">
-          <Button variant="secondary" onClick={onHide} disabled={processing}>
-            Tutup
-          </Button>
+          <div className={`d-flex gap-2 ${isMobile ? 'w-100 flex-column' : ''}`}>
+            <Button 
+              variant="secondary" 
+              onClick={onHide} 
+              disabled={processing}
+              className={isMobile ? 'w-100' : ''}
+            >
+              Tutup
+            </Button>
           {isPending && (
             <>
               <Button 
                 variant="danger" 
                 onClick={() => onReject(payment.id)}
                 disabled={processing || !rejectReason.trim()}
+                className={isMobile ? 'w-100' : ''}
               >
                 {processing ? (
                   <Spinner animation="border" size="sm" className="me-2" />
@@ -708,6 +804,7 @@ function DetailPembayaranModal({
                 variant="success" 
                 onClick={() => onApprove(payment.id)}
                 disabled={processing}
+                className={isMobile ? 'w-100' : ''}
               >
                 {processing ? (
                   <Spinner animation="border" size="sm" className="me-2" />
@@ -718,6 +815,7 @@ function DetailPembayaranModal({
               </Button>
             </>
           )}
+          </div>
         </Modal.Footer>
       </Modal>
 
@@ -727,6 +825,7 @@ function DetailPembayaranModal({
         onHide={() => setShowImageModal(false)} 
         size="xl"
         centered
+        fullscreen={isMobile ? true : false}
       >
         <Modal.Header closeButton className="border-0">
           <Modal.Title>Bukti Transfer (Ukuran Penuh)</Modal.Title>

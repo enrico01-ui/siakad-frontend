@@ -39,7 +39,7 @@ export default function Sidebar({
   const menuItems = {
     admin: [
       { label: "Dashboard", icon: House, path: "/admin" },
-      { label: "Pembayaran", icon: CashStack, path: "/admin/verifikasi-spp" },
+      { label: "Pembayaran", icon: CashStack, path: "/admin/verif-spp" },
       { 
         label: "Tagihan", 
         icon: FileEarmarkText, 
