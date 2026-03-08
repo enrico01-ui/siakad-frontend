@@ -414,8 +414,7 @@ export default function Kelas() {
           {/* Filters */}
           <Row className="mb-3">
             <Col md={6}>
-            <div className="position-relative">
-              <InputGroup style={{ flexWrap: 'nowrap', minWidth: 0 }}>
+            <InputGroup style={{ flexWrap: 'nowrap', minWidth: 0 }}>
                 <InputGroup.Text style={{ flexShrink: 0 }}>
                   <Search size={18} />
                 </InputGroup.Text>
@@ -426,7 +425,6 @@ export default function Kelas() {
                   style={{ minWidth: 0, flex: '1 1 auto' }}
                 />
               </InputGroup>
-              </div>
             </Col>
             {kelasList.length > 1 && activeTab === "siswa" && (
               <Col md={4}>
