@@ -68,7 +68,7 @@
 
   /* Input groups */
   .input-group {
-    flex-direction: column;
+    flex-direction: row;
   }
 
   .input-group .btn {

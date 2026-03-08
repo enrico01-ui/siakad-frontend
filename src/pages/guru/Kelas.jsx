@@ -413,16 +413,15 @@ export default function Kelas() {
 
           {/* Filters */}
           <Row className="mb-3">
-            <Col md={6}>
-            <InputGroup style={{ flexWrap: 'nowrap', minWidth: 0 }}>
+            <Col md={6} className="d-flex">
+              <InputGroup className="flex-nowrap w-100">
                 <InputGroup.Text style={{ flexShrink: 0 }}>
                   <Search size={18} />
                 </InputGroup.Text>
                 <Form.Control
-                  placeholder="Cari nama atau NIS..."
+                  placeholder="Cari nama atau NIS siswa..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  style={{ minWidth: 0, flex: '1 1 auto' }}
                 />
               </InputGroup>
             </Col>
