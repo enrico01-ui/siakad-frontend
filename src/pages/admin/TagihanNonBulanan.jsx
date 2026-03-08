@@ -342,14 +342,15 @@ const filteredData = (tagihanData || []).filter(t =>
           <Row className="mb-3 g-2">
             <Col xs={12} md={3}>
             <div className="position-relative">
-              <InputGroup size="sm">
-                <InputGroup.Text>
+              <InputGroup style={{ flexWrap: 'nowrap', minWidth: 0 }}>
+                <InputGroup.Text style={{ flexShrink: 0 }}>
                   <Search size={18} />
                 </InputGroup.Text>
                 <Form.Control
-                  placeholder="Cari siswa..."
+                  placeholder="Cari Siswa"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{ minWidth: 0, flex: '1 1 auto' }}
                 />
               </InputGroup>
               </div>

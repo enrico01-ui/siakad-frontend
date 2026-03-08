@@ -223,16 +223,17 @@ export default function VerifikasiPembayaran() {
           {/* Search */}
           <Row className="mb-3 g-2">
             <Col xs={12}>
-              <InputGroup>
-                <InputGroup.Text>
-                  <Search size={18} />
-                </InputGroup.Text>
-                <Form.Control
-                  placeholder="Cari nama, NIS, kelas..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </InputGroup>
+             <InputGroup style={{ flexWrap: 'nowrap', minWidth: 0 }}>
+              <InputGroup.Text style={{ flexShrink: 0 }}>
+                <Search size={18} />
+              </InputGroup.Text>
+              <Form.Control
+                placeholder="Cari nama, NIS, kelas..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ minWidth: 0, flex: '1 1 auto' }}
+              />
+            </InputGroup>
             </Col>
             {stats.pending > 0 && (
               <Col xs={12}>

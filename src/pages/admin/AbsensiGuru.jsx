@@ -571,12 +571,15 @@ export default function AbsensiGuru() {
           {/* ── FILTERS ── */}
           <Row className="mb-3 no-print">
             <Col md={activeTab === "laporan" ? 3 : 4}>
-              <InputGroup>
-                <InputGroup.Text><Search size={18} /></InputGroup.Text>
+              <InputGroup style={{ flexWrap: 'nowrap', minWidth: 0 }}>
+                <InputGroup.Text style={{ flexShrink: 0 }}>
+                  <Search size={18} />
+                </InputGroup.Text>
                 <Form.Control
                   placeholder="Cari nama atau NIP guru..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{ minWidth: 0, flex: '1 1 auto' }}
                 />
               </InputGroup>
             </Col>

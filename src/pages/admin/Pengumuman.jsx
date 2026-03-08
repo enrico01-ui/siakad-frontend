@@ -220,14 +220,15 @@ const handleFileChange = (e) => {
           <Row className="mb-3">
             <Col md={6}>
               <div className="position-relative">
-              <InputGroup>
-                <InputGroup.Text>
+              <InputGroup style={{ flexWrap: 'nowrap', minWidth: 0 }}>
+                <InputGroup.Text style={{ flexShrink: 0 }}>
                   <Search size={18} />
                 </InputGroup.Text>
                 <Form.Control
                   placeholder="Cari pengumuman..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{ minWidth: 0, flex: '1 1 auto' }}
                 />
               </InputGroup>
               </div>

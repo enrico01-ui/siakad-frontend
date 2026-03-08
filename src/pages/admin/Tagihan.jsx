@@ -419,14 +419,15 @@ export default function TuitionFee() {
           <Row className="g-2">
             <Col xs={12} md={4}>
               <div className="position-relative">
-              <InputGroup size="sm">
-                <InputGroup.Text>
+              <InputGroup style={{ flexWrap: 'nowrap', minWidth: 0 }}>
+                <InputGroup.Text style={{ flexShrink: 0 }}>
                   <Search size={18} />
                 </InputGroup.Text>
                 <Form.Control
-                  placeholder="Cari nama atau NIS..."
+                  placeholder="Cari nama atau nis"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{ minWidth: 0, flex: '1 1 auto' }}
                 />
               </InputGroup>
               </div>
